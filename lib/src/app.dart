@@ -5,6 +5,8 @@ import 'application/pool_controller.dart';
 import 'application/settings_controller.dart';
 import 'application/viewer_controller.dart';
 import 'core/clock.dart';
+import 'domain/platform/screen_wake.dart';
+import 'domain/platform/wallpaper_service.dart';
 import 'ui/theme/orbit_theme.dart';
 import 'ui/viewer/viewer_screen.dart';
 
@@ -16,6 +18,8 @@ class OrbitApp extends StatelessWidget {
     required this.pool,
     required this.settings,
     required this.collection,
+    required this.wallpaper,
+    required this.screenWake,
     this.clock = const SystemClock(),
   });
 
@@ -23,6 +27,8 @@ class OrbitApp extends StatelessWidget {
   final PoolController pool;
   final SettingsController settings;
   final CollectionController collection;
+  final WallpaperService wallpaper;
+  final ScreenWake screenWake;
   final Clock clock;
 
   @override
@@ -37,6 +43,8 @@ class OrbitApp extends StatelessWidget {
         settings: settings,
         collection: collection,
         clock: clock,
+        wallpaper: wallpaper,
+        screenWake: screenWake,
       ),
     );
   }

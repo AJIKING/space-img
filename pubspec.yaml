@@ -20,6 +20,12 @@ dependencies:
   path_provider: ^2.1.5
   # キャッシュファイル名(URL → 安定したキー)生成
   crypto: ^3.0.6
+  # 写真をフォト/ギャラリーに保存(WallpaperService 境界の本番実装)
+  gal: ^2.3.1
+  # 画面スリープ防止(ScreenWake 境界の本番実装。常時表示の待ち受け用)
+  wakelock_plus: ^1.2.8
+  # Android のみ壁紙に直接適用(WallpaperService 境界の本番実装)
+  async_wallpaper: ^2.1.0
 
 dev_dependencies:
   flutter_test:

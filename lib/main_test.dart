@@ -12,9 +12,11 @@ import 'src/application/viewer_controller.dart';
 import 'src/core/clock.dart';
 import 'src/data/file_image_store.dart';
 import 'src/data/prefs_collection_store.dart';
+import 'src/data/platform_wallpaper_service.dart';
 import 'src/data/prefs_pool_store.dart';
 import 'src/data/prefs_settings_store.dart';
 import 'src/data/seed_photos.dart';
+import 'src/data/wakelock_screen_wake.dart';
 import 'src/domain/photos/photo.dart';
 import 'src/domain/photos/photo_source.dart';
 import 'src/domain/pool/image_cache_cleaner.dart';
@@ -80,6 +82,8 @@ Future<void> main() async {
       settings: settings,
       collection: collection,
       clock: clock,
+      wallpaper: const PlatformWallpaperService(),
+      screenWake: const WakelockScreenWake(),
     ),
   );
 

@@ -24,12 +24,14 @@ void main() {
       showMeta: false,
       autoAdvance: true,
       intervalSeconds: 30,
+      keepAwake: true,
     );
     await store.save(settings);
 
     final loaded = (await store.load())!;
 
     expect(loaded.category, PhotoCategory.saturn);
+    expect(loaded.keepAwake, isTrue);
     expect(loaded.showClock, isFalse);
     expect(loaded.clockPosition, ClockPosition.bottom);
     expect(loaded.clockSize, ClockSize.l);

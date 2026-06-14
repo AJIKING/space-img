@@ -13,6 +13,8 @@ import 'package:orbit/src/domain/pool/pool_refresher.dart';
 
 import '../../fixtures/fake_clock.dart';
 import '../../fixtures/fake_photo_source.dart';
+import '../../fixtures/fake_screen_wake.dart';
+import '../../fixtures/fake_wallpaper_service.dart';
 import '../../fixtures/in_memory_collection_store.dart';
 import '../../fixtures/in_memory_image_store.dart';
 import '../../fixtures/in_memory_pool_store.dart';
@@ -56,6 +58,8 @@ void main() {
         settings: settings,
         collection: collection,
         clock: clock,
+        wallpaper: FakeWallpaperService(),
+        screenWake: FakeScreenWake(),
       ),
     );
 

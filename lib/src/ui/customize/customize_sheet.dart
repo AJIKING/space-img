@@ -164,6 +164,13 @@ class CustomizeSheet extends StatelessWidget {
                       ],
                       onChanged: (v) => update(s.copyWith(intervalSeconds: v)),
                     ),
+                    ToggleRow(
+                      key: const Key('tune-keep-awake'),
+                      title: '画面を常時オン',
+                      subtitle: 'KEEP AWAKE — 眺める待ち受け',
+                      value: s.keepAwake,
+                      onChanged: (v) => update(s.copyWith(keepAwake: v)),
+                    ),
                   ],
                 ),
               ),

@@ -2,6 +2,8 @@
     <!-- NASA Images API への通信に必要(release ビルドでも有効にする。
          flutter 既定では debug/profile にしか入らないため明示する)。 -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- 壁紙の直接適用(async_wallpaper)に必要。 -->
+    <uses-permission android:name="android.permission.SET_WALLPAPER"/>
     <application
         android:label="orbit"
         android:name="${applicationName}"

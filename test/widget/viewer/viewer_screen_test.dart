@@ -14,6 +14,8 @@ import 'package:orbit/src/ui/viewer/viewer_screen.dart';
 
 import '../../fixtures/fake_clock.dart';
 import '../../fixtures/fake_photo_source.dart';
+import '../../fixtures/fake_screen_wake.dart';
+import '../../fixtures/fake_wallpaper_service.dart';
 import '../../fixtures/in_memory_collection_store.dart';
 import '../../fixtures/in_memory_image_store.dart';
 import '../../fixtures/in_memory_pool_store.dart';
@@ -58,6 +60,7 @@ void main() {
     required PoolController pool,
     required SettingsController settings,
     required CollectionController collection,
+    FakeScreenWake? screenWake,
   }) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -67,6 +70,8 @@ void main() {
           settings: settings,
           collection: collection,
           clock: clock,
+          wallpaper: FakeWallpaperService(),
+          screenWake: screenWake ?? FakeScreenWake(),
         ),
       ),
     );
@@ -270,9 +275,34 @@ void main() {
     await tester.tap(find.byKey(const Key('dock-wallpaper')));
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('wallpaper-apply')), findsOneWidget);
+    expect(find.byKey(const Key('wallpaper-save')), findsOneWidget);
 
     await dispose(tester);
+  });
+
+  testWidgets('画面を常時オン設定で ScreenWake が有効になる', (tester) async {
+    final pool = nebulaPool(['a']);
+    final viewer = ViewerController(pool: pool.pool, random: Random(0));
+    final settings = settingsOf();
+    final screenWake = FakeScreenWake();
+    await pumpScreen(
+      tester,
+      viewer: viewer,
+      pool: pool,
+      settings: settings,
+      collection: collectionOf(),
+      screenWake: screenWake,
+    );
+    // 既定(false)で起動。
+    expect(screenWake.enabled, isFalse);
+
+    await settings.update(settings.settings.copyWith(keepAwake: true));
+    await tester.pump();
+    expect(screenWake.enabled, isTrue);
+
+    await dispose(tester);
+    // 画面を離れたら解除される。
+    expect(screenWake.enabled, isFalse);
   });
 
   testWidgets('TUNE タップでカスタマイズシートが開く', (tester) async {

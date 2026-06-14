@@ -24,6 +24,7 @@ class ViewerSettings {
     this.showMeta = true,
     this.autoAdvance = false,
     this.intervalSeconds = 6,
+    this.keepAwake = false,
   });
 
   /// 観測テーマ(表示するプールのカテゴリ)。
@@ -41,6 +42,9 @@ class ViewerSettings {
   final bool autoAdvance;
   final int intervalSeconds;
 
+  /// 画面スリープ防止(常時表示の“眺める待ち受け”用)。
+  final bool keepAwake;
+
   ViewerSettings copyWith({
     PhotoCategory? category,
     bool? showClock,
@@ -52,6 +56,7 @@ class ViewerSettings {
     bool? showMeta,
     bool? autoAdvance,
     int? intervalSeconds,
+    bool? keepAwake,
   }) {
     return ViewerSettings(
       category: category ?? this.category,
@@ -64,6 +69,7 @@ class ViewerSettings {
       showMeta: showMeta ?? this.showMeta,
       autoAdvance: autoAdvance ?? this.autoAdvance,
       intervalSeconds: intervalSeconds ?? this.intervalSeconds,
+      keepAwake: keepAwake ?? this.keepAwake,
     );
   }
 }

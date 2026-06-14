@@ -47,6 +47,7 @@ class PrefsSettingsStore implements SettingsStore {
     'showMeta': s.showMeta,
     'autoAdvance': s.autoAdvance,
     'intervalSeconds': s.intervalSeconds,
+    'keepAwake': s.keepAwake,
   };
 
   static ViewerSettings _decode(Map<String, dynamic> j) {
@@ -64,6 +65,7 @@ class PrefsSettingsStore implements SettingsStore {
       showMeta: j['showMeta'] as bool? ?? d.showMeta,
       autoAdvance: j['autoAdvance'] as bool? ?? d.autoAdvance,
       intervalSeconds: j['intervalSeconds'] as int? ?? d.intervalSeconds,
+      keepAwake: j['keepAwake'] as bool? ?? d.keepAwake,
     );
   }
 }

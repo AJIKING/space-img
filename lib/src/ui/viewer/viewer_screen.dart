@@ -9,6 +9,8 @@ import '../../application/settings_controller.dart';
 import '../../application/viewer_controller.dart';
 import '../../core/clock.dart';
 import '../../domain/photos/photo.dart';
+import '../../domain/platform/screen_wake.dart';
+import '../../domain/platform/wallpaper_service.dart';
 import '../collection/collection_sheet.dart';
 import '../customize/customize_sheet.dart';
 import '../wallpaper/wallpaper_preview.dart';
@@ -29,6 +31,8 @@ class ViewerScreen extends StatefulWidget {
     required this.settings,
     required this.collection,
     required this.clock,
+    required this.wallpaper,
+    required this.screenWake,
   });
 
   final ViewerController controller;
@@ -36,6 +40,8 @@ class ViewerScreen extends StatefulWidget {
   final SettingsController settings;
   final CollectionController collection;
   final Clock clock;
+  final WallpaperService wallpaper;
+  final ScreenWake screenWake;
 
   @override
   State<ViewerScreen> createState() => _ViewerScreenState();
@@ -60,6 +66,7 @@ class _ViewerScreenState extends State<ViewerScreen> {
     });
     widget.settings.addListener(_onSettingsChanged);
     _applyAutoAdvance();
+    _applyScreenWake();
   }
 
   @override
@@ -67,11 +74,14 @@ class _ViewerScreenState extends State<ViewerScreen> {
     widget.settings.removeListener(_onSettingsChanged);
     _ticker?.cancel();
     _autoTimer?.cancel();
+    // 画面常時オンを解除する(この画面を離れたら通常に戻す)。
+    widget.screenWake.setEnabled(false);
     super.dispose();
   }
 
   void _onSettingsChanged() {
     _applyAutoAdvance();
+    _applyScreenWake();
     final category = widget.settings.settings.category;
     if (category != _appliedCategory) {
       _appliedCategory = category;
@@ -99,6 +109,10 @@ class _ViewerScreenState extends State<ViewerScreen> {
         (_) => widget.controller.next(),
       );
     }
+  }
+
+  void _applyScreenWake() {
+    widget.screenWake.setEnabled(widget.settings.settings.keepAwake);
   }
 
   void _onKey(KeyEvent event) {
@@ -199,6 +213,7 @@ class _ViewerScreenState extends State<ViewerScreen> {
                             context,
                             photo,
                             widget.clock.now(),
+                            widget.wallpaper,
                           );
                         }
                       },
