@@ -83,10 +83,11 @@ class _ViewerScreenState extends State<ViewerScreen> {
   Future<void> _switchCategory(PhotoCategory category) async {
     await widget.pool.setCategory(category);
     if (!mounted) return;
-    widget.controller.showPool(widget.pool.pool);
+    widget.controller.showPool(widget.pool.pool); // 切替は新規表示なのでランダム
     await widget.pool.refresh();
+    // 補充後はまだ同じテーマを見ているときだけ、表示を維持しつつ反映する。
     if (!mounted || widget.settings.settings.category != category) return;
-    widget.controller.showPool(widget.pool.pool);
+    widget.controller.adoptPool(widget.pool.pool);
   }
 
   void _applyAutoAdvance() {

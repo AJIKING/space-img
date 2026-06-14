@@ -32,6 +32,9 @@ class CollectionController extends ChangeNotifier {
       _favorites = [photo, ..._favorites];
     }
     notifyListeners();
-    await store.save(_favorites);
+    // 永続化失敗は次回起動への影響にとどめ、未処理例外にしない。
+    try {
+      await store.save(_favorites);
+    } catch (_) {}
   }
 }

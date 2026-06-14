@@ -122,8 +122,8 @@ class PoolRefresher {
               sourceUrl: c.imageUrl,
             ),
           );
-        } on PhotoSourceException {
-          // この 1 枚だけ落とし、残りで続行する。
+        } catch (_) {
+          // この 1 枚だけ落とし(DL 失敗・保存失敗のどちらでも)、残りで続行する。
           continue;
         }
       }
@@ -137,7 +137,8 @@ class PoolRefresher {
       // ここでは行わない(ADR 0001。掃除は全カテゴリを束ねる層の責務)。
       await store.save(category, newPool);
       return PoolRefreshResult(newPool, RefreshStatus.refreshed);
-    } on PhotoSourceException catch (e) {
+    } catch (e) {
+      // 背景処理は決して投げない。どの失敗でも旧プールを保持する(ADR 0004)。
       return PoolRefreshResult(current, RefreshStatus.failed, error: e);
     }
   }

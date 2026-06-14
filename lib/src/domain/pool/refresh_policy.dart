@@ -15,6 +15,9 @@ class RefreshPolicy {
   /// - 経過時間が [interval] 以上なら true(ちょうど境界は補充する)。
   bool shouldRefresh({required DateTime now, DateTime? lastRefreshedAt}) {
     if (lastRefreshedAt == null) return true;
+    // 端末時計が巻き戻された等で未来刻印になっている場合も補充する
+    // (そうしないと差が永久に interval 未満となり補充が止まる)。
+    if (now.isBefore(lastRefreshedAt)) return true;
     return now.difference(lastRefreshedAt) >= interval;
   }
 }

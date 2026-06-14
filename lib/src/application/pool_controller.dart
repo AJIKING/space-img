@@ -35,6 +35,10 @@ class PoolController extends ChangeNotifier {
   bool _isRefreshing = false;
   RefreshStatus? _lastStatus;
 
+  /// 補充を直列化するチェーン(同時に複数の refresh を走らせない。
+  /// 並走すると掃除(prune)が別カテゴリの補充中画像を消しうるため)。
+  Future<void> _refreshChain = Future<void>.value();
+
   PhotoCategory get category => _category;
   bool get isRefreshing => _isRefreshing;
   RefreshStatus? get lastStatus => _lastStatus;
@@ -57,7 +61,15 @@ class PoolController extends ChangeNotifier {
   }
 
   /// 現在カテゴリを必要なら補充する。失敗・スキップ時は現状維持。
-  Future<void> refresh() async {
+  /// 直前の補充が走っていれば、それが終わってから順番に実行する。
+  Future<void> refresh() {
+    final chain = _refreshChain.then((_) => _doRefresh());
+    // 失敗してもチェーンを止めない(次回の refresh が動けるように)。
+    _refreshChain = chain.catchError((_) {});
+    return chain;
+  }
+
+  Future<void> _doRefresh() async {
     final target = _category;
     _isRefreshing = true;
     notifyListeners();

@@ -31,6 +31,9 @@ class SettingsController extends ChangeNotifier {
   Future<void> update(ViewerSettings settings) async {
     _settings = settings;
     notifyListeners();
-    await store.save(settings);
+    // 永続化失敗は次回起動への影響にとどめ、未処理例外にしない。
+    try {
+      await store.save(settings);
+    } catch (_) {}
   }
 }

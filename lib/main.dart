@@ -83,7 +83,8 @@ Future<void> main() async {
   final initialCategory = pool.category;
   unawaited(
     pool.refresh().then((_) {
-      if (pool.category == initialCategory) viewer.showPool(pool.pool);
+      // 表示中の写真は維持しつつ実写真へ移行(シードのままならランダムに 1 枚)。
+      if (pool.category == initialCategory) viewer.adoptPool(pool.pool);
     }),
   );
 }

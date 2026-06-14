@@ -26,8 +26,9 @@ class ViewerController extends ChangeNotifier {
   int get total => _pool.length;
   bool get hudHidden => _hudHidden;
 
-  /// 表示中の写真。プールが空なら null。
-  Photo? get current => _pool.isEmpty ? null : _pool.photos[_index];
+  /// 表示中の写真。プールが空なら null。index は防御的にクランプする。
+  Photo? get current =>
+      _pool.isEmpty ? null : _pool.photos[_index.clamp(0, _pool.length - 1)];
 
   /// 次の写真へ(末尾の次は先頭へ巡回)。
   void next() {
@@ -49,11 +50,26 @@ class ViewerController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 別のプールに差し替える(観測テーマ切替・補充完了時)。新しいプールから
-  /// ランダムな位置で表示し直す。
+  /// 別のプールに差し替えて、ランダムな位置で表示し直す(観測テーマ切替など、
+  /// ユーザー操作で「新しく見せる」とき)。
   void showPool(PhotoPool pool) {
     _pool = pool;
     _index = pool.isEmpty ? 0 : _random.nextInt(pool.length);
+    notifyListeners();
+  }
+
+  /// 別のプールに差し替えるが、**いま見ている写真は可能なら維持**する
+  /// (バックグラウンド補充の完了時など、表示を勝手に飛ばしたくないとき)。
+  /// 現在の写真が新プールに無ければランダムな位置を選ぶ(シード→実写真の移行)。
+  void adoptPool(PhotoPool pool) {
+    final currentId = current?.id;
+    _pool = pool;
+    final keptIndex = currentId == null
+        ? -1
+        : pool.photos.indexWhere((p) => p.id == currentId);
+    _index = keptIndex >= 0
+        ? keptIndex
+        : (pool.isEmpty ? 0 : _random.nextInt(pool.length));
     notifyListeners();
   }
 

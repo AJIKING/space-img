@@ -98,6 +98,38 @@ void main() {
     expect(controller.total, 3);
   });
 
+  test('adoptPool: いま見ている写真が新プールにあれば維持する', () {
+    final controller = ViewerController(
+      pool: poolOf(['a', 'b', 'c']),
+      random: Random(0),
+    );
+    controller.showPhoto(samplePhoto('b'));
+    expect(controller.current!.id, 'b');
+
+    // b を含む別プールに差し替え → b を維持。
+    controller.adoptPool(poolOf(['x', 'b', 'y', 'z']));
+
+    expect(controller.current!.id, 'b');
+  });
+
+  test('adoptPool: 現在の写真が新プールに無ければ別の写真を出す', () {
+    final controller = ViewerController(
+      pool: poolOf(['seed']),
+      random: Random(0),
+    );
+    expect(controller.current!.id, 'seed');
+
+    controller.adoptPool(poolOf(['a', 'b', 'c']));
+
+    expect(['a', 'b', 'c'].contains(controller.current!.id), isTrue);
+  });
+
+  test('adoptPool: 空プールでも安全', () {
+    final controller = ViewerController(pool: poolOf(['a']), random: Random(0));
+    controller.adoptPool(PhotoPool.empty());
+    expect(controller.current, isNull);
+  });
+
   test('toggleHud で反転し通知する', () {
     final controller = ViewerController(pool: poolOf(['a']), random: Random(0));
     var notified = 0;

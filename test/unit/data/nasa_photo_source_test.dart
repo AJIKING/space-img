@@ -77,4 +77,19 @@ void main() {
       throwsA(isA<PhotoSourceException>()),
     );
   });
+
+  test('download で画像以外の Content-Type は弾く', () async {
+    final client = MockClient(
+      (req) async => http.Response(
+        '<html>error</html>',
+        200,
+        headers: {'content-type': 'text/html'},
+      ),
+    );
+
+    expect(
+      () => NasaPhotoSource(client: client).download('https://x/a.jpg'),
+      throwsA(isA<PhotoSourceException>()),
+    );
+  });
 }

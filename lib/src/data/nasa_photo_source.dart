@@ -57,6 +57,12 @@ class NasaPhotoSource implements PhotoSource {
       if (res.statusCode != 200) {
         throw PhotoSourceException('download HTTP ${res.statusCode}');
       }
+      // 200 で HTML エラーページ等を返す CDN を弾く(無音で壊れた画像を
+      // キャッシュしないため)。Content-Type が無い場合は許容する。
+      final contentType = res.headers['content-type'];
+      if (contentType != null && !contentType.startsWith('image/')) {
+        throw PhotoSourceException('download not an image: $contentType');
+      }
       return res.bodyBytes;
     } on PhotoSourceException {
       rethrow;

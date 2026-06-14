@@ -26,6 +26,11 @@ void main() {
     expect(policy.shouldRefresh(now: base, lastRefreshedAt: last), isTrue);
   });
 
+  test('未来刻印(端末時計の巻き戻し)でも補充する', () {
+    final last = base.add(const Duration(days: 5));
+    expect(policy.shouldRefresh(now: base, lastRefreshedAt: last), isTrue);
+  });
+
   test('Clock を進めると判定が変わる', () {
     final clock = FakeClock(base);
     final last = base.subtract(const Duration(hours: 23));
