@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:orbit/src/domain/photos/photo.dart';
 import 'package:orbit/src/domain/photos/photo_source.dart';
@@ -20,14 +22,18 @@ void main() {
     InMemoryImageStore? imageStore,
     int minSize = 1,
     int targetSize = 30,
+    int candidatePoolSize = 80,
+    int seed = 0,
   }) {
     return PoolRefresher(
       clock: clock ?? FakeClock(now),
       source: source,
       store: store ?? InMemoryPoolStore(),
       imageStore: imageStore ?? InMemoryImageStore(),
+      random: Random(seed),
       minSize: minSize,
       targetSize: targetSize,
+      candidatePoolSize: candidatePoolSize,
     );
   }
 
@@ -126,7 +132,8 @@ void main() {
     ).refreshIfNeeded(PhotoPool.empty(), PhotoCategory.nebula);
 
     expect(r.status, RefreshStatus.refreshed);
-    expect(r.pool.photos.map((p) => p.id), ['a', 'c']);
+    expect(r.pool.length, 2);
+    expect(r.pool.photos.map((p) => p.id), containsAll(<String>['a', 'c']));
   });
 
   test('全ダウンロード失敗で minSize 未満なら旧プール維持', () async {
@@ -157,6 +164,30 @@ void main() {
     ).refreshIfNeeded(PhotoPool.empty(), PhotoCategory.nebula);
 
     expect(r.pool.length, 1);
+  });
+
+  test('候補が多いとき targetSize 枚に絞り、シードで選び方が変わる(多様性)', () async {
+    final candidates = [for (var i = 0; i < 12; i++) sampleRemote('p$i')];
+
+    Future<List<String>> selectWith(int seed) async {
+      final r = await build(
+        source: FakePhotoSource(candidates: candidates),
+        targetSize: 4,
+        candidatePoolSize: 12,
+        seed: seed,
+      ).refreshIfNeeded(PhotoPool.empty(), PhotoCategory.nebula);
+      return r.pool.photos.map((p) => p.id).toList();
+    }
+
+    final first = await selectWith(1);
+    final second = await selectWith(7);
+
+    expect(first.length, 4);
+    expect(second.length, 4);
+    // すべて候補内。
+    expect(candidates.map((c) => c.id), containsAll(first));
+    // シードが違えば選び方(集合 or 並び)が変わる = 先頭固定ではない。
+    expect(first, isNot(second));
   });
 
   test('補充は取得したカテゴリのキーへ保存する', () async {

@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -31,6 +32,7 @@ void main() {
       source: source,
       store: s,
       imageStore: img,
+      random: Random(0),
     );
     return PoolController(
       store: s,

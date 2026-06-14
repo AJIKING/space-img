@@ -40,6 +40,7 @@ void main() {
         source: FakePhotoSource(),
         store: store,
         imageStore: InMemoryImageStore(),
+        random: Random(0),
       ),
       seedPools: {PhotoCategory.nebula: seed},
       initialCategory: PhotoCategory.nebula,

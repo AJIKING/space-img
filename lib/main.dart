@@ -37,6 +37,7 @@ Future<void> main() async {
     source: NasaPhotoSource(),
     store: poolStore,
     imageStore: imageStore,
+    random: Random(),
   );
 
   // カスタマイズ設定を読み込む(無ければ既定値)。観測テーマもここに含まれる。

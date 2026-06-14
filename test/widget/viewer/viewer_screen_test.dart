@@ -36,6 +36,7 @@ void main() {
         source: source ?? FakePhotoSource(),
         store: store,
         imageStore: InMemoryImageStore(),
+        random: Random(0),
       ),
       seedPools: seeds,
       initialCategory: initial,

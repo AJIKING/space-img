@@ -28,7 +28,13 @@ class NasaPhotoSource implements PhotoSource {
     int limit = 24,
   }) async {
     final uri = Uri.parse(_searchBase).replace(
-      queryParameters: {'q': nasaQuery(category), 'media_type': 'image'},
+      queryParameters: {
+        'q': nasaQuery(category),
+        'media_type': 'image',
+        // 1 ページに多めに取り、呼び出し側(PoolRefresher)が広い候補から
+        // ランダムに選ぶ(似た写真ばかりにならないように)。NASA の上限は 100。
+        'page_size': '100',
+      },
     );
     try {
       final res = await _client.get(uri).timeout(timeout);

@@ -33,6 +33,7 @@ void main() {
 
     expect(captured.queryParameters['q'], 'mars surface');
     expect(captured.queryParameters['media_type'], 'image');
+    expect(captured.queryParameters['page_size'], '100');
   });
 
   test('limit 件に切り詰める', () async {

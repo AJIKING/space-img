@@ -37,6 +37,7 @@ void main() {
       source: FakePhotoSource(),
       store: poolStore,
       imageStore: imageStore,
+      random: Random(0),
     );
     final pool = PoolController(
       store: poolStore,

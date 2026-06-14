@@ -50,6 +50,7 @@ Future<void> main() async {
     source: const _OfflinePhotoSource(),
     store: poolStore,
     imageStore: imageStore,
+    random: Random(0),
   );
 
   final settings = SettingsController(store: PrefsSettingsStore());

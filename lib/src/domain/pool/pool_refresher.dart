@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import '../../core/clock.dart';
 import '../photos/photo.dart';
 import '../photos/photo_source.dart';
@@ -47,19 +49,34 @@ class PoolRefresher {
     required this.source,
     required this.store,
     required this.imageStore,
+    required this.random,
     this.policy = const RefreshPolicy(),
-    this.targetSize = 30,
+    this.targetSize = 24,
     this.minSize = 1,
+    this.candidatePoolSize = 80,
   }) : assert(minSize >= 1, 'minSize は 1 以上'),
-       assert(targetSize >= minSize, 'targetSize は minSize 以上');
+       assert(targetSize >= minSize, 'targetSize は minSize 以上'),
+       assert(
+         candidatePoolSize >= targetSize,
+         'candidatePoolSize は targetSize 以上',
+       );
 
   final Clock clock;
   final PhotoSource source;
   final PoolStore store;
   final ImageStore imageStore;
+
+  /// 候補のシャッフルに使う乱数。本番は entropy、テストは seed 固定で決定的に。
+  final Random random;
   final RefreshPolicy policy;
+
+  /// プールに溜める枚数(= ダウンロードする枚数)。
   final int targetSize;
   final int minSize;
+
+  /// NASA から取得する候補メタの上限。これをシャッフルして [targetSize] 枚を選ぶ。
+  /// 関連度順の先頭だけに偏らせない(似た写真ばかりになるのを避ける)。
+  final int candidatePoolSize;
 
   /// 必要なら補充する。補充不要・失敗時は [current] をそのまま返す。
   Future<PoolRefreshResult> refreshIfNeeded(
@@ -77,15 +94,19 @@ class PoolRefresher {
     try {
       final candidates = await source.fetchCandidates(
         category,
-        limit: targetSize,
+        limit: candidatePoolSize,
       );
       if (candidates.isEmpty) {
         return PoolRefreshResult(current, RefreshStatus.skippedNoCandidates);
       }
 
+      // 関連度順の先頭に偏らないようシャッフルしてから targetSize 枚を選ぶ。
+      final shuffled = [...candidates]..shuffle(random);
+
       final photos = <Photo>[];
       final seen = <String>{};
-      for (final c in candidates) {
+      for (final c in shuffled) {
+        if (photos.length >= targetSize) break;
         if (!seen.add(c.id)) continue; // 同一 id の重複は捨てる
         try {
           final bytes = await source.download(c.imageUrl);
