@@ -70,7 +70,13 @@ Future<void> main() async {
     ),
   );
 
-  // 起動後にバックグラウンドで現在カテゴリを補充(表示はもう出ている)。
-  // 失敗しても無視する(ADR 0004)。
-  unawaited(pool.refresh());
+  // 起動後にバックグラウンドで現在カテゴリを補充(表示はもうシードで出ている)。
+  // 取得が終わったら、ユーザーがまだ同じテーマを見ていれば NASA の実写真へ
+  // 差し替える(初回起動でもその場で本物が出る)。失敗時はシードのまま(ADR 0004)。
+  final initialCategory = pool.category;
+  unawaited(
+    pool.refresh().then((_) {
+      if (pool.category == initialCategory) viewer.showPool(pool.pool);
+    }),
+  );
 }
