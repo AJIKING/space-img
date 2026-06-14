@@ -7,5 +7,11 @@ class WakelockScreenWake implements ScreenWake {
   const WakelockScreenWake();
 
   @override
-  Future<void> setEnabled(bool enabled) => WakelockPlus.toggle(enable: enabled);
+  Future<void> setEnabled(bool enabled) async {
+    try {
+      await WakelockPlus.toggle(enable: enabled);
+    } catch (_) {
+      // 未対応プラットフォーム(desktop/web 等)では no-op。
+    }
+  }
 }

@@ -38,6 +38,15 @@ void main() {
     expect(service.saved.single.id, 'a');
   });
 
+  testWidgets('保存失敗でも例外を投げず失敗トーストを出す', (tester) async {
+    await pump(tester, FakeWallpaperService(failSave: true));
+
+    await tester.tap(find.byKey(const Key('wallpaper-save')));
+    await tester.pump();
+
+    expect(find.text('保存に失敗しました'), findsOneWidget);
+  });
+
   testWidgets('直接設定対応(Android 相当)では壁紙設定ボタンが出て呼ばれる', (tester) async {
     final service = FakeWallpaperService(supportsDirectSet: true);
     await pump(tester, service);

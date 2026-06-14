@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:async_wallpaper/async_wallpaper.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -10,7 +11,10 @@ import '../domain/platform/wallpaper_service.dart';
 
 /// [WallpaperService] の本番実装。
 ///
-/// - 保存: `gal` でフォト / ギャラリーへ。
+/// - 保存: `gal` の `putImageBytes` でフォトへ(キャッシュは拡張子なし `.img`
+///   なので**バイト列で保存**する。`putImage(path)` は拡張子判定で失敗する)。
+///   アルバム指定はしない = 追加のみの権限([NSPhotoLibraryAddUsageDescription]
+///   だけで済み、旧 Android のストレージ権限も不要)。
 /// - 直接適用: Android のみ `async_wallpaper`(iOS は OS 仕様で不可)。
 class PlatformWallpaperService implements WallpaperService {
   const PlatformWallpaperService();
@@ -20,7 +24,7 @@ class PlatformWallpaperService implements WallpaperService {
 
   @override
   Future<void> saveToGallery(Photo photo) async {
-    await Gal.putImage(await _ensureLocalFile(photo), album: 'ORBIT');
+    await Gal.putImageBytes(await _bytes(photo), name: 'orbit_${photo.id}');
   }
 
   @override
@@ -28,21 +32,31 @@ class PlatformWallpaperService implements WallpaperService {
     if (!supportsDirectSet) {
       throw UnsupportedError('この端末では壁紙の直接設定はできません');
     }
-    await AsyncWallpaper.setWallpaperFromFile(
+    // async_wallpaper は失敗時に例外でなく false を返すので、明示的に例外化する。
+    final ok = await AsyncWallpaper.setWallpaperFromFile(
       filePath: await _ensureLocalFile(photo),
       wallpaperLocation: AsyncWallpaper.BOTH_SCREENS,
     );
+    if (!ok) throw Exception('壁紙の設定に失敗しました');
   }
 
-  /// imageRef がローカルファイルパスならそのまま、アセット(同梱シード)なら
-  /// 一時ファイルへ書き出してパスを返す(gal / async_wallpaper はパスを要する)。
+  /// 写真のバイト列を得る(キャッシュファイル or 同梱アセット)。
+  Future<Uint8List> _bytes(Photo photo) async {
+    final ref = photo.imageRef;
+    if (ref.startsWith('assets/')) {
+      return (await rootBundle.load(ref)).buffer.asUint8List();
+    }
+    return File(ref).readAsBytes();
+  }
+
+  /// 壁紙適用にはファイルパスが要る。アセットは一時ファイルへ書き出す。
+  /// キャッシュ(`.img`)は内容で復号されるためパスのまま渡せる。
   Future<String> _ensureLocalFile(Photo photo) async {
     final ref = photo.imageRef;
     if (!ref.startsWith('assets/')) return ref;
-    final data = await rootBundle.load(ref);
     final dir = await getTemporaryDirectory();
     final file = File('${dir.path}/orbit_${photo.id}.jpg');
-    await file.writeAsBytes(data.buffer.asUint8List(), flush: true);
+    await file.writeAsBytes(await _bytes(photo), flush: true);
     return file.path;
   }
 }
