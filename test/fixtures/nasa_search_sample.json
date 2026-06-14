@@ -1,0 +1,51 @@
+{
+  "collection": {
+    "items": [
+      {
+        "href": "https://images-assets.nasa.gov/image/PIA00001/collection.json",
+        "data": [
+          {
+            "center": "JPL",
+            "title": "Carina Nebula",
+            "nasa_id": "PIA00001",
+            "date_created": "2022-07-12T14:00:00Z",
+            "media_type": "image"
+          }
+        ],
+        "links": [
+          {
+            "href": "https://images-assets.nasa.gov/image/PIA00001/PIA00001~thumb.jpg",
+            "rel": "preview",
+            "render": "image"
+          }
+        ]
+      },
+      {
+        "href": "https://images-assets.nasa.gov/image/PIA00002/collection.json",
+        "data": [
+          {
+            "center": "GSFC",
+            "title": "リンクが無い item(採用されない)",
+            "nasa_id": "PIA00002",
+            "date_created": "2021-01-01T00:00:00Z"
+          }
+        ]
+      },
+      {
+        "href": "https://images-assets.nasa.gov/image/PIA00003/collection.json",
+        "data": [
+          {
+            "center": "STScI",
+            "nasa_id": "PIA00003",
+            "date_created": "2020-05-05T00:00:00Z"
+          }
+        ],
+        "links": [
+          {
+            "href": "https://images-assets.nasa.gov/image/PIA00003/PIA00003~thumb.jpg"
+          }
+        ]
+      }
+    ]
+  }
+}

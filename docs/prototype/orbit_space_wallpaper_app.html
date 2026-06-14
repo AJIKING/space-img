@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ORBIT — 宇宙を眺める待ち受け</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* ---- design tokens ---- */
+  --void:#060912;
+  --void-2:#0b1020;
+  --hud:#E8ECF2;
+  --muted:#6E7891;
+  --line:rgba(232,236,242,.16);
+  --line-strong:rgba(232,236,242,.34);
+  --amber:#F5A623;
+  --amber-dim:rgba(245,166,35,.16);
+  --signal-red:#FF4D4D;
+  --panel:rgba(8,11,20,.82);
+  --panel-solid:#0a0e1a;
+
+  --r-sm:8px; --r-md:14px; --r-lg:22px;
+  --ease:cubic-bezier(.16,.84,.34,1);
+
+  --f-display:"Space Grotesk","Noto Sans JP",sans-serif;
+  --f-mono:"Space Mono",ui-monospace,monospace;
+  --f-body:"Noto Sans JP","Space Grotesk",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:var(--f-body);
+  background:
+    radial-gradient(1200px 700px at 20% -10%, #131a33 0%, transparent 60%),
+    radial-gradient(900px 600px at 110% 110%, #1a1230 0%, transparent 55%),
+    var(--void);
+  color:var(--hud);
+  display:grid;place-items:center;
+  min-height:100dvh;
+  padding:24px;
+  overflow:hidden;
+}
+
+/* ===== device frame ===== */
+.stage{display:flex;flex-direction:column;align-items:center;gap:16px}
+.device{
+  position:relative;
+  width:390px;height:auto;aspect-ratio:390/844;max-height:88dvh;
+  border-radius:54px;
+  background:#000;
+  padding:10px;
+  box-shadow:
+    0 0 0 2px #20242e,
+    0 0 0 11px #0c0e14,
+    0 40px 80px -20px rgba(0,0,0,.8),
+    0 0 120px -30px rgba(245,166,35,.12);
+}
+.screen{
+  position:relative;width:100%;height:100%;
+  border-radius:44px;overflow:hidden;background:var(--void);
+  isolation:isolate;
+}
+/* dynamic island */
+.island{
+  position:absolute;top:11px;left:50%;transform:translateX(-50%);
+  width:118px;height:33px;background:#000;border-radius:20px;z-index:60;
+}
+.caption{font-family:var(--f-mono);font-size:11px;color:var(--muted);letter-spacing:.06em;text-align:center;max-width:390px;line-height:1.6}
+.caption b{color:var(--amber);font-weight:700}
+
+/* ===== photo layer ===== */
+.viewer{position:absolute;inset:0;z-index:1;background:var(--void);overflow:hidden}
+.slide{
+  position:absolute;inset:0;
+  background-size:cover;background-position:center;
+  opacity:0;transition:opacity .7s var(--ease);
+  will-change:opacity,transform;
+}
+.slide.active{opacity:1}
+.slide.kenburns{animation:kenburns 24s linear infinite alternate}
+@keyframes kenburns{from{transform:scale(1.04) translate(0,0)}to{transform:scale(1.18) translate(-2%,-2%)}}
+.slide::after{ /* legibility vignette */
+  content:"";position:absolute;inset:0;
+  background:
+    linear-gradient(180deg, rgba(6,9,18,.55) 0%, transparent 22%, transparent 58%, rgba(6,9,18,.78) 100%),
+    radial-gradient(120% 80% at 50% 50%, transparent 55%, rgba(6,9,18,.4) 100%);
+  pointer-events:none;
+}
+
+/* ===== HUD overlay ===== */
+.hud{position:absolute;inset:0;z-index:10;pointer-events:none;transition:opacity .45s var(--ease)}
+.hud.hidden{opacity:0}
+
+/* status bar */
+.statusbar{
+  position:absolute;top:0;left:0;right:0;height:54px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 26px;font-family:var(--f-mono);font-size:12px;font-weight:700;letter-spacing:.04em;
+}
+.statusbar .sig{display:flex;gap:5px;align-items:center}
+.statusbar .dot{width:5px;height:5px;border-radius:50%;background:var(--hud)}
+.statusbar .dot.b{height:9px}.statusbar .dot.c{height:7px;opacity:.6}
+
+/* corner brackets */
+.bracket{position:absolute;width:34px;height:34px;border:1.5px solid var(--line-strong);pointer-events:none}
+.bracket.tl{top:70px;left:18px;border-right:0;border-bottom:0}
+.bracket.tr{top:70px;right:18px;border-left:0;border-bottom:0}
+.bracket.bl{bottom:150px;left:18px;border-right:0;border-top:0}
+.bracket.br{bottom:150px;right:18px;border-left:0;border-top:0}
+
+/* reticle */
+.reticle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:70px;height:70px;pointer-events:none}
+.reticle::before,.reticle::after{content:"";position:absolute;background:var(--line-strong)}
+.reticle::before{left:50%;top:0;width:1px;height:100%;transform:translateX(-50%)}
+.reticle::after{top:50%;left:0;height:1px;width:100%;transform:translateY(-50%)}
+.reticle span{position:absolute;top:50%;left:50%;width:14px;height:14px;border:1px solid var(--amber);border-radius:50%;transform:translate(-50%,-50%)}
+
+/* side telemetry */
+.telemetry{position:absolute;top:50%;transform:translateY(-50%);font-family:var(--f-mono);font-size:9.5px;line-height:1.9;color:var(--muted);letter-spacing:.03em}
+.telemetry.left{left:24px;text-align:left}
+.telemetry.right{right:24px;text-align:right}
+.telemetry b{color:var(--hud);font-weight:700}
+.telemetry .amber{color:var(--amber)}
+
+/* big clock */
+.clock-wrap{
+  position:absolute;left:0;right:0;text-align:center;pointer-events:none;
+  top:110px;transition:all .4s var(--ease);
+}
+.clock-wrap.pos-center{top:42%}
+.clock-wrap.pos-bottom{top:auto;bottom:190px}
+.clock{font-family:var(--f-mono);font-weight:700;font-size:62px;letter-spacing:.02em;line-height:1;text-shadow:0 2px 30px rgba(0,0,0,.6)}
+.clock-wrap.size-s .clock{font-size:46px}
+.clock-wrap.size-l .clock{font-size:78px}
+.cdate{font-family:var(--f-display);font-weight:500;font-size:13px;letter-spacing:.22em;margin-top:10px;color:var(--hud);opacity:.92;text-transform:uppercase}
+
+/* photo meta (bottom) */
+.meta{
+  position:absolute;left:0;right:0;bottom:108px;padding:0 26px;
+  transition:transform .55s var(--ease),opacity .55s var(--ease);
+}
+.meta .eyebrow{font-family:var(--f-mono);font-size:10px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase;display:flex;gap:8px;align-items:center}
+.meta .eyebrow::before{content:"";width:16px;height:1px;background:var(--amber)}
+.meta h1{font-family:var(--f-display);font-weight:600;font-size:19px;line-height:1.25;margin:10px 0 8px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-shadow:0 1px 20px rgba(0,0,0,.7)}
+.meta .sub{font-family:var(--f-mono);font-size:11px;color:var(--muted);letter-spacing:.02em}
+.meta .sub b{color:var(--hud)}
+
+/* progress dots */
+.progress{position:absolute;left:50%;transform:translateX(-50%);bottom:92px;display:flex;gap:5px}
+.progress i{width:5px;height:5px;border-radius:50%;background:var(--line-strong);transition:.3s}
+.progress i.on{background:var(--amber);width:18px;border-radius:3px}
+
+/* bottom dock */
+.dock{
+  position:absolute;left:0;right:0;bottom:0;height:88px;z-index:20;
+  display:flex;align-items:center;justify-content:space-around;
+  padding:0 14px 22px;pointer-events:auto;
+}
+.dock-btn{
+  pointer-events:auto;background:none;border:0;color:var(--muted);
+  display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;
+  font-family:var(--f-mono);font-size:9px;letter-spacing:.08em;transition:color .2s;padding:6px 10px;
+}
+.dock-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6}
+.dock-btn:hover,.dock-btn.active{color:var(--hud)}
+.dock-btn.fav.on{color:var(--amber)}
+.dock-btn.fav.on svg{fill:var(--amber)}
+.dock-btn:focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:8px}
+
+/* scanline on re-acquire */
+.scan{position:absolute;inset:0;z-index:15;pointer-events:none;opacity:0}
+.scan.run{animation:scanrun .7s ease-out}
+.scan::before{content:"";position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--amber),transparent);box-shadow:0 0 18px var(--amber);top:-2px}
+.scan::after{content:"RE-ACQUIRING TARGET";position:absolute;top:54%;left:50%;transform:translateX(-50%);font-family:var(--f-mono);font-size:10px;letter-spacing:.3em;color:var(--amber)}
+@keyframes scanrun{
+  0%{opacity:1}
+  10%{opacity:1}
+  100%{opacity:0}
+}
+.scan.run::before{animation:scanline .7s ease-out}
+@keyframes scanline{from{top:-2px}to{top:100%}}
+
+/* ===== bottom sheet panel ===== */
+.sheet{
+  position:absolute;left:0;right:0;bottom:0;z-index:40;
+  background:var(--panel);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-top:1px solid var(--line);border-radius:26px 26px 0 0;
+  transform:translateY(101%);transition:transform .5s var(--ease);
+  max-height:78%;overflow-y:auto;pointer-events:auto;padding-bottom:30px;
+}
+.sheet.open{transform:translateY(0)}
+.sheet-head{position:sticky;top:0;background:linear-gradient(180deg,var(--panel-solid),rgba(10,14,26,.7));
+  padding:16px 22px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}
+.sheet-head .grab{position:absolute;top:7px;left:50%;transform:translateX(-50%);width:38px;height:4px;border-radius:2px;background:var(--line-strong)}
+.sheet-title{font-family:var(--f-display);font-weight:600;font-size:16px;display:flex;align-items:center;gap:9px}
+.sheet-title .tag{font-family:var(--f-mono);font-size:9px;color:var(--amber);border:1px solid var(--amber);border-radius:4px;padding:2px 5px;letter-spacing:.05em}
+.x{background:none;border:0;color:var(--muted);cursor:pointer;width:30px;height:30px;display:grid;place-items:center;border-radius:50%}
+.x:hover{color:var(--hud);background:rgba(255,255,255,.05)}
+.x svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.8;fill:none}
+
+.sheet-body{padding:18px 22px}
+.group{margin-bottom:26px}
+.group>.label{font-family:var(--f-mono);font-size:10px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;margin-bottom:13px;display:flex;align-items:center;gap:8px}
+.group>.label::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* category chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  font-family:var(--f-body);font-size:13px;color:var(--hud);
+  background:rgba(255,255,255,.04);border:1px solid var(--line);
+  border-radius:999px;padding:8px 15px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:7px;
+}
+.chip .en{font-family:var(--f-mono);font-size:9px;color:var(--muted)}
+.chip:hover{border-color:var(--line-strong)}
+.chip.on{background:var(--amber-dim);border-color:var(--amber);color:#fff}
+.chip.on .en{color:var(--amber)}
+
+/* setting rows */
+.row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row .rl{display:flex;flex-direction:column;gap:3px}
+.row .rl .t{font-size:14px;font-weight:500}
+.row .rl .d{font-family:var(--f-mono);font-size:10px;color:var(--muted)}
+
+/* toggle */
+.tg{position:relative;width:46px;height:27px;flex:none;cursor:pointer}
+.tg input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:2}
+.tg .track{position:absolute;inset:0;background:rgba(255,255,255,.1);border:1px solid var(--line);border-radius:999px;transition:.25s}
+.tg .knob{position:absolute;top:3px;left:3px;width:19px;height:19px;border-radius:50%;background:var(--muted);transition:.25s var(--ease)}
+.tg input:checked~.track{background:var(--amber-dim);border-color:var(--amber)}
+.tg input:checked~.knob{transform:translateX(19px);background:var(--amber)}
+.tg input:focus-visible~.track{outline:2px solid var(--amber);outline-offset:2px}
+
+/* segmented */
+.seg{display:flex;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:9px;padding:3px;gap:2px}
+.seg button{flex:none;background:none;border:0;color:var(--muted);font-family:var(--f-mono);font-size:11px;
+  padding:6px 12px;border-radius:6px;cursor:pointer;transition:.2s;letter-spacing:.04em}
+.seg button.on{background:var(--amber);color:#0a0e1a;font-weight:700}
+.seg button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+
+/* favorites grid */
+.fav-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.fav-cell{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--void-2);cursor:pointer;border:1px solid var(--line)}
+.fav-cell .img{position:absolute;inset:0;background-size:cover;background-position:center}
+.fav-cell:hover{border-color:var(--amber)}
+.fav-empty{font-family:var(--f-mono);font-size:11px;color:var(--muted);text-align:center;padding:30px 10px;line-height:1.8}
+
+/* lockscreen preview modal */
+.modal{position:absolute;inset:0;z-index:50;background:rgba(3,5,10,.7);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s;padding:24px}
+.modal.open{opacity:1;pointer-events:auto}
+.lock{position:relative;width:100%;aspect-ratio:390/844;max-height:74%;border-radius:34px;overflow:hidden;
+  border:1px solid var(--line-strong);box-shadow:0 30px 60px -20px #000}
+.lock .lk-img{position:absolute;inset:0;background-size:cover;background-position:center}
+.lock .lk-img::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.35),transparent 30%,transparent 60%,rgba(0,0,0,.5))}
+.lock .lk-top{position:absolute;top:54px;left:0;right:0;text-align:center;z-index:2}
+.lock .lk-date{font-family:var(--f-display);font-size:14px;letter-spacing:.18em;font-weight:500;text-transform:uppercase}
+.lock .lk-time{font-family:var(--f-mono);font-weight:700;font-size:74px;line-height:1;margin-top:2px}
+.lock .lk-foot{position:absolute;bottom:42px;left:0;right:0;text-align:center;z-index:2;font-family:var(--f-mono);font-size:10px;color:rgba(255,255,255,.7);letter-spacing:.2em}
+.modal .lk-actions{position:absolute;bottom:28px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:10px;padding:0 30px}
+.btn{font-family:var(--f-display);font-weight:600;font-size:14px;border-radius:12px;padding:13px 22px;cursor:pointer;border:1px solid var(--line);
+  background:rgba(255,255,255,.06);color:var(--hud);width:100%;transition:.2s}
+.btn.primary{background:var(--amber);color:#0a0e1a;border-color:var(--amber)}
+.btn:hover{filter:brightness(1.08)}
+.btn:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.lk-note{font-family:var(--f-mono);font-size:9.5px;color:var(--muted);text-align:center;line-height:1.7}
+
+/* toast */
+.toast{position:absolute;bottom:104px;left:50%;transform:translateX(-50%) translateY(20px);z-index:70;
+  background:rgba(10,14,26,.95);border:1px solid var(--amber);border-radius:10px;padding:11px 18px;
+  font-family:var(--f-mono);font-size:11px;color:var(--hud);letter-spacing:.03em;opacity:0;transition:.35s var(--ease);pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast .a{color:var(--amber)}
+
+/* sleep dim overlay */
+.dim{position:absolute;inset:0;z-index:45;background:#000;opacity:0;pointer-events:none;transition:opacity 2.5s linear}
+.dim.on{opacity:.96;pointer-events:auto}
+.dim .wake{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--f-mono);font-size:11px;color:var(--muted);letter-spacing:.2em;text-align:center;line-height:2}
+
+/* loading */
+.loader{position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:var(--void);transition:opacity .5s}
+.loader.gone{opacity:0;pointer-events:none}
+.loader .ring{width:46px;height:46px;border:2px solid var(--line);border-top-color:var(--amber);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader .lt{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;color:var(--muted)}
+
+/* tap hint */
+.hint{position:absolute;bottom:200px;left:50%;transform:translateX(-50%);z-index:12;font-family:var(--f-mono);font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.1em;display:flex;align-items:center;gap:7px;animation:hintpulse 2.6s ease-in-out infinite;pointer-events:none}
+@keyframes hintpulse{0%,100%{opacity:.3}50%{opacity:.9}}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms!important;transition-duration:.12s!important}
+  .slide.kenburns{animation:none}
+}
+
+/* small screens: go fullscreen, hide bezel */
+@media (max-width:480px){
+  body{padding:0}
+  .stage{gap:0}
+  .device{width:100vw;height:100dvh;max-height:none;border-radius:0;padding:0;box-shadow:none}
+  .screen{border-radius:0}
+  .caption{display:none}
+  .island{top:8px}
+}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="device">
+    <div class="screen" id="screen">
+      <div class="island"></div>
+
+      <!-- photo viewer -->
+      <div class="viewer" id="viewer">
+        <div class="slide" id="slideA"></div>
+        <div class="slide" id="slideB"></div>
+      </div>
+
+      <div class="scan" id="scan"></div>
+
+      <!-- HUD -->
+      <div class="hud" id="hud">
+        <div class="statusbar">
+          <span id="sbTime">--:--</span>
+          <span class="sig"><span class="dot c"></span><span class="dot b"></span><span class="dot"></span><span style="margin-left:6px">ORBIT</span></span>
+        </div>
+
+        <div class="bracket tl"></div><div class="bracket tr"></div>
+        <div class="bracket bl"></div><div class="bracket br"></div>
+
+        <div class="reticle" id="reticle"><span></span></div>
+
+        <div class="telemetry left" id="telLeft">
+          <div>RA <b id="ra">12 04 33</b></div>
+          <div>DEC <b id="dec">-18 52</b></div>
+          <div class="amber">TRACKING</div>
+        </div>
+        <div class="telemetry right" id="telRight">
+          <div><b id="frame">001</b>/<span id="frameTot">--</span></div>
+          <div>MAG <b>+6.4</b></div>
+          <div>EXP <b>30s</b></div>
+        </div>
+
+        <div class="clock-wrap pos-top size-m" id="clockWrap">
+          <div class="clock" id="clock">--:--</div>
+          <div class="cdate" id="cdate">—</div>
+        </div>
+
+        <div class="meta" id="meta">
+          <div class="eyebrow"><span id="metaCat">DEEP SPACE</span></div>
+          <h1 id="metaTitle">読み込み中…</h1>
+          <div class="sub"><b id="metaCenter">NASA</b> · <span id="metaDate">—</span></div>
+        </div>
+
+        <div class="progress" id="progress"></div>
+        <div class="hint" id="hint">◂ スワイプで次の宇宙へ ▸</div>
+      </div>
+
+      <!-- dock -->
+      <div class="dock">
+        <button class="dock-btn" id="btnFav" aria-label="お気に入りに追加">
+          <svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.7-10-9.4C.3 8 2 4.5 5.4 4.5c2 0 3.4 1.2 4.6 2.8C11.2 5.7 12.6 4.5 14.6 4.5 18 4.5 19.7 8 22 11.6 19.5 16.3 12 21 12 21z"/></svg>
+          <span>SAVE</span>
+        </button>
+        <button class="dock-btn" id="btnCollection" aria-label="コレクションを開く">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          <span>SAVED</span>
+        </button>
+        <button class="dock-btn" id="btnLock" aria-label="待ち受けプレビュー">
+          <svg viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2.5"/><circle cx="12" cy="17" r="1"/></svg>
+          <span>WALLPAPER</span>
+        </button>
+        <button class="dock-btn" id="btnCustom" aria-label="カスタマイズ">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+          <span>TUNE</span>
+        </button>
+      </div>
+
+      <!-- loader -->
+      <div class="loader" id="loader">
+        <div class="ring"></div>
+        <div class="lt" id="loaderText">ESTABLISHING UPLINK…</div>
+      </div>
+
+      <!-- customization sheet -->
+      <div class="sheet" id="sheetCustom">
+        <div class="sheet-head">
+          <div class="grab"></div>
+          <div class="sheet-title">カスタマイズ <span class="tag">TUNE</span></div>
+          <button class="x" data-close aria-label="閉じる"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        </div>
+        <div class="sheet-body">
+          <div class="group">
+            <div class="label">観測テーマ</div>
+            <div class="chips" id="catChips"></div>
+          </div>
+
+          <div class="group">
+            <div class="label">時計</div>
+            <div class="row">
+              <div class="rl"><span class="t">時計を表示</span><span class="d">CLOCK OVERLAY</span></div>
+              <label class="tg"><input type="checkbox" id="tgClock" checked><span class="track"></span><span class="knob"></span></label>
+            </div>
+            <div class="row">
+              <div class="rl"><span class="t">位置</span><span class="d">POSITION</span></div>
+              <div class="seg" id="segClockPos">
+                <button data-v="top" class="on">上</button><button data-v="center">中央</button><button data-v="bottom">下</button>
+              </div>
+            </div>
+            <div class="row">
+              <div class="rl"><span class="t">サイズ</span><span class="d">SIZE</span></div>
+              <div class="seg" id="segClockSize">
+                <button data-v="s">S</button><button data-v="m" class="on">M</button><button data-v="l">L</button>
+              </div>
+            </div>
+            <div class="row">
+              <div class="rl"><span class="t">24時間表示</span><span class="d">24H FORMAT</span></div>
+              <label class="tg"><input type="checkbox" id="tg24" checked><span class="track"></span><span class="knob"></span></label>
+            </div>
+          </div>
+
+          <div class="group">
+            <div class="label">HUD（観測機器の表示）</div>
+            <div class="row">
+              <div class="rl"><span class="t">座標テレメトリ</span><span class="d">RA / DEC READOUT</span></div>
+              <label class="tg"><input type="checkbox" id="tgTel" checked><span class="track"></span><span class="knob"></span></label>
+            </div>
+            <div class="row">
+              <div class="rl"><span class="t">レチクル（照準）</span><span class="d">CENTER RETICLE</span></div>
+              <label class="tg"><input type="checkbox" id="tgReticle" checked><span class="track"></span><span class="knob"></span></label>
+            </div>
+            <div class="row">
+              <div class="rl"><span class="t">写真情報</span><span class="d">PHOTO METADATA</span></div>
+              <label class="tg"><input type="checkbox" id="tgMeta" checked><span class="track"></span><span class="knob"></span></label>
+            </div>
+          </div>
+
+          <div class="group">
+            <div class="label">アンビエント</div>
+            <div class="row">
+              <div class="rl"><span class="t">自動スライド</span><span class="d">AUTO ADVANCE</span></div>
+              <label class="tg"><input type="checkbox" id="tgAuto"><span class="track"></span><span class="knob"></span></label>
+            </div>
+            <div class="row">
+              <div class="rl"><span class="t">切替の間隔</span><span class="d">INTERVAL</span></div>
+              <div class="seg" id="segInterval">
+                <button data-v="6" class="on">6s</button><button data-v="12">12s</button><button data-v="30">30s</button>
+              </div>
+            </div>
+            <div class="row">
+              <div class="rl"><span class="t">Ken Burns ズーム</span><span class="d">SLOW ZOOM</span></div>
+              <label class="tg"><input type="checkbox" id="tgKen" checked><span class="track"></span><span class="knob"></span></label>
+            </div>
+            <div class="row">
+              <div class="rl"><span class="t">おやすみタイマー</span><span class="d">SLEEP — 画面を暗転</span></div>
+              <div class="seg" id="segSleep">
+                <button data-v="0" class="on">OFF</button><button data-v="0.3">即</button><button data-v="15">15分</button><button data-v="30">30分</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- collection sheet -->
+      <div class="sheet" id="sheetCollection">
+        <div class="sheet-head">
+          <div class="grab"></div>
+          <div class="sheet-title">コレクション <span class="tag">SAVED</span></div>
+          <button class="x" data-close aria-label="閉じる"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        </div>
+        <div class="sheet-body">
+          <div class="fav-grid" id="favGrid"></div>
+          <div class="fav-empty" id="favEmpty">保存した宇宙はまだありません。<br>気に入った写真で ♡ SAVE を押すと<br>ここに記録されます。</div>
+        </div>
+      </div>
+
+      <!-- lockscreen modal -->
+      <div class="modal" id="lockModal">
+        <div class="lock">
+          <div class="lk-img" id="lkImg"></div>
+          <div class="lk-top">
+            <div class="lk-date" id="lkDate">—</div>
+            <div class="lk-time" id="lkTime">--:--</div>
+          </div>
+          <div class="lk-foot" id="lkFoot">— ORBIT —</div>
+        </div>
+        <div class="lk-actions">
+          <div class="lk-note" id="lkNote">これがロック画面でのイメージです。<br>実機では「写真を保存」→ iOS の壁紙設定から適用します。</div>
+          <button class="btn primary" id="lkSave">この宇宙を待ち受けにする</button>
+          <button class="btn" data-close-modal>閉じる</button>
+        </div>
+      </div>
+
+      <!-- sleep dim -->
+      <div class="dim" id="dim"><div class="wake">SLEEP MODE<br>タップで再起動</div></div>
+
+      <!-- toast -->
+      <div class="toast" id="toast"></div>
+    </div>
+  </div>
+  <div class="caption">参考：金魚アプリ「RYUKIN」の“眺める×カスタマイズ×待ち受け”を <b>NASA Image and Video Library</b> で再構成。ドラッグ／矢印キーで写真を切替、画面タップで HUD を消して没入。</div>
+</div>
+
+<script>
+"use strict";
+
+/* ===================== state ===================== */
+const CATEGORIES = [
+  {q:"nebula",        ja:"星雲",   en:"NEBULA"},
+  {q:"galaxy",        ja:"銀河",   en:"GALAXY"},
+  {q:"earth from space", ja:"地球", en:"EARTH"},
+  {q:"mars surface",  ja:"火星",   en:"MARS"},
+  {q:"moon",          ja:"月",     en:"LUNAR"},
+  {q:"jupiter",       ja:"木星",   en:"JOVIAN"},
+  {q:"sun solar",     ja:"太陽",   en:"SOLAR"},
+  {q:"hubble deep field", ja:"深宇宙", en:"DEEP FIELD"},
+  {q:"aurora",        ja:"オーロラ", en:"AURORA"},
+  {q:"saturn",        ja:"土星",   en:"SATURN"},
+];
+
+const state = {
+  cat: CATEGORIES[0],
+  photos: [],
+  idx: 0,
+  fav: [],
+  usingFallback: false,
+  settings:{
+    clock:true, clockPos:"top", clockSize:"m", h24:true,
+    tel:true, reticle:true, meta:true,
+    auto:false, interval:6, ken:true, sleep:0,
+  },
+  hudHidden:false,
+  activeSlide:"A",
+  autoTimer:null,
+  sleepTimer:null,
+};
+
+/* ===================== helpers ===================== */
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+
+function toast(msg){
+  const t=$("#toast");
+  t.innerHTML=msg;
+  t.classList.add("show");
+  clearTimeout(t._t);
+  t._t=setTimeout(()=>t.classList.remove("show"),2000);
+}
+
+/* upgrade NASA thumbnail url to a larger asset when possible */
+function bigImage(thumb){
+  if(!thumb) return thumb;
+  // typical: .../{id}/{id}~thumb.jpg  ->  ~medium.jpg (more reliable than ~orig)
+  return thumb.replace(/~thumb\.jpg$/i,"~medium.jpg");
+}
+
+/* ===================== procedural fallback ===================== */
+/* If NASA can't be reached (e.g. sandboxed preview), synthesize a believable
+   celestial object so the experience still reads. Pure CSS gradients drawn to canvas. */
+function makeProcedural(seedStr, kind){
+  const c=document.createElement("canvas");
+  c.width=600;c.height=1100;
+  const x=c.getContext("2d");
+  let s=0; for(const ch of seedStr) s=(s*31+ch.charCodeAt(0))>>>0;
+  const rnd=()=>{ s=(s*1664525+1013904223)>>>0; return s/4294967296; };
+
+  // deep space base
+  x.fillStyle="#04060d";x.fillRect(0,0,600,1100);
+
+  const palettes={
+    nebula:[["#ff5e87","#7a3cff"],["#3cd6ff","#9b5cff"],["#ff8a3c","#ff3c8a"]],
+    galaxy:[["#fff3c7","#ff9e5c"],["#cfe5ff","#5c7cff"]],
+    earth:[["#3ca7ff","#0a3a78"],["#28d6a8","#0a5a78"]],
+    mars:[["#ff7a3c","#7a2c12"],["#ffae6e","#8a3a1c"]],
+    moon:[["#d8d8e0","#6a6a78"]],
+    sun:[["#ffd23c","#ff6a1c"]],
+    deep:[["#9bb8ff","#2c1c5a"],["#ff9ed6","#3a1c5a"]],
+    aurora:[["#3cff9e","#1c5a8a"],["#9e3cff","#1c3a8a"]],
+    default:[["#7a9eff","#2c1c5a"]],
+  };
+  const pal=(palettes[kind]||palettes.default);
+  const pick=pal[Math.floor(rnd()*pal.length)];
+
+  if(["earth","mars","moon","sun"].includes(kind)){
+    // a planetary body
+    const cx=300+(rnd()-.5)*120, cy=560+(rnd()-.5)*160, r=200+rnd()*120;
+    const g=x.createRadialGradient(cx-r*.3,cy-r*.3,r*.1,cx,cy,r);
+    g.addColorStop(0,pick[0]);g.addColorStop(1,pick[1]);
+    x.fillStyle=g;x.beginPath();x.arc(cx,cy,r,0,7);x.fill();
+    // terminator shadow
+    const sh=x.createRadialGradient(cx+r*.5,cy+r*.4,r*.2,cx,cy,r*1.1);
+    sh.addColorStop(0,"rgba(0,0,0,0)");sh.addColorStop(1,"rgba(0,0,0,.85)");
+    x.fillStyle=sh;x.beginPath();x.arc(cx,cy,r,0,7);x.fill();
+    // surface speckle
+    for(let i=0;i<260;i++){
+      const a=rnd()*7, rr=rnd()*r, px=cx+Math.cos(a)*rr, py=cy+Math.sin(a)*rr;
+      x.fillStyle=`rgba(255,255,255,${rnd()*.06})`;
+      x.fillRect(px,py,rnd()*3,rnd()*3);
+    }
+  } else {
+    // nebula / galaxy clouds
+    for(let i=0;i<6;i++){
+      const cx=rnd()*600,cy=rnd()*1100,r=160+rnd()*340;
+      const g=x.createRadialGradient(cx,cy,0,cx,cy,r);
+      const col=pal[Math.floor(rnd()*pal.length)];
+      g.addColorStop(0,hexA(col[0],.5));g.addColorStop(.5,hexA(col[1],.22));g.addColorStop(1,"rgba(0,0,0,0)");
+      x.fillStyle=g;x.fillRect(0,0,600,1100);
+    }
+    if(kind==="galaxy"||kind==="deep"){ // bright core
+      const g=x.createRadialGradient(300,520,0,300,520,260);
+      g.addColorStop(0,"rgba(255,250,230,.9)");g.addColorStop(.3,hexA(pick[0],.5));g.addColorStop(1,"rgba(0,0,0,0)");
+      x.fillStyle=g;x.fillRect(0,0,600,1100);
+    }
+  }
+  // stars
+  for(let i=0;i<420;i++){
+    const px=rnd()*600,py=rnd()*1100,sz=rnd()*1.8;
+    x.fillStyle=`rgba(255,255,255,${.3+rnd()*.7})`;
+    x.beginPath();x.arc(px,py,sz,0,7);x.fill();
+  }
+  return c.toDataURL("image/jpeg",.85);
+}
+function hexA(hex,a){
+  const n=parseInt(hex.slice(1),16);
+  return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`;
+}
+function fallbackKind(q){
+  if(/nebula/.test(q))return"nebula";
+  if(/galaxy/.test(q))return"galaxy";
+  if(/earth/.test(q))return"earth";
+  if(/mars/.test(q))return"mars";
+  if(/moon|lunar/.test(q))return"moon";
+  if(/sun|solar/.test(q))return"sun";
+  if(/deep|hubble/.test(q))return"deep";
+  if(/aurora/.test(q))return"aurora";
+  return"default";
+}
+function buildFallback(cat){
+  const kind=fallbackKind(cat.q);
+  const names={
+    nebula:["輝線星雲 NGC","暗黒星雲 B33","反射星雲 IC","散光星雲 Sh2"],
+    galaxy:["渦巻銀河 M","棒渦巻銀河 NGC","楕円銀河 M","衝突銀河 Arp"],
+    earth:["地球低軌道より","軌道上の夜明け","大気の縁(リム)","台風の眼"],
+    mars:["火星表面 ガレクレーター","オリンポス山","極冠の氷","砂塵の平原"],
+    moon:["静かの海","クレーター ティコ","月の出","南極エイトケン盆地"],
+    sun:["コロナ質量放出","太陽フレア","彩層のプロミネンス","黒点群"],
+    deep:["ハッブル・ディープフィールド","重力レンズ","初期宇宙の銀河団","遠方クエーサー"],
+    aurora:["軌道から見たオーロラ","極光のカーテン","南極光","磁気嵐の夜"],
+    default:["深宇宙セクター","観測対象","未同定天体","軌道上の眺め"],
+  };
+  const ns=names[kind]||names.default;
+  return ns.map((nm,i)=>({
+    title:nm+" "+(100+Math.floor(Math.random()*899)),
+    center:["JPL","GSFC","STScI","JSC","MSFC"][i%5],
+    date:"SIMULATED · "+(2018+i)+"",
+    img:makeProcedural(cat.q+i,kind),
+    id:"sim-"+cat.q+"-"+i,
+  }));
+}
+
+/* ===================== data load ===================== */
+async function loadCategory(cat){
+  state.cat=cat;
+  setLoader(true, "ESTABLISHING UPLINK…");
+  runScan();
+  try{
+    const url=`https://images-api.nasa.gov/search?q=${encodeURIComponent(cat.q)}&media_type=image`;
+    const ctrl=new AbortController();
+    const to=setTimeout(()=>ctrl.abort(),6000);
+    const res=await fetch(url,{signal:ctrl.signal});
+    clearTimeout(to);
+    if(!res.ok) throw new Error("http "+res.status);
+    const json=await res.json();
+    const items=(json.collection?.items||[]).filter(it=>it.links?.[0]?.href && it.data?.[0]?.title);
+    if(!items.length) throw new Error("empty");
+    state.photos=items.slice(0,24).map(it=>({
+      title:it.data[0].title,
+      center:it.data[0].center||"NASA",
+      date:(it.data[0].date_created||"").slice(0,10),
+      img:bigImage(it.links[0].href),
+      thumb:it.links[0].href,
+      id:it.data[0].nasa_id,
+    }));
+    state.usingFallback=false;
+  }catch(e){
+    state.photos=buildFallback(cat);
+    state.usingFallback=true;
+  }
+  state.idx=0;
+  setLoader(false);
+  showPhoto(0,true);
+  buildProgress();
+  if(state.usingFallback){
+    toast('<span class="a">◇</span> オフライン観測モード（NASA信号なし）');
+  }
+}
+
+function setLoader(on,txt){
+  const l=$("#loader");
+  if(txt)$("#loaderText").textContent=txt;
+  l.classList.toggle("gone",!on);
+}
+
+/* ===================== rendering ===================== */
+function showPhoto(i,instant){
+  if(!state.photos.length)return;
+  i=(i+state.photos.length)%state.photos.length;
+  state.idx=i;
+  const p=state.photos[i];
+
+  const cur=state.activeSlide==="A"?$("#slideA"):$("#slideB");
+  const nxt=state.activeSlide==="A"?$("#slideB"):$("#slideA");
+
+  const im=new Image();
+  const apply=(src)=>{
+    nxt.style.backgroundImage=`url("${src}")`;
+    nxt.classList.toggle("kenburns", state.settings.ken && state.settings.auto);
+    requestAnimationFrame(()=>{
+      nxt.classList.add("active");
+      cur.classList.remove("active");
+    });
+    state.activeSlide=state.activeSlide==="A"?"B":"A";
+  };
+  im.onload=()=>apply(p.img);
+  im.onerror=()=>{ // large variant failed -> fall back to thumb, then procedural
+    if(p.thumb && p.img!==p.thumb){ p.img=p.thumb; const t=new Image(); t.onload=()=>apply(p.thumb); t.onerror=()=>apply(makeProcedural(p.id||p.title, fallbackKind(state.cat.q))); t.src=p.thumb; }
+    else apply(makeProcedural(p.id||p.title, fallbackKind(state.cat.q)));
+  };
+  im.src=p.img;
+
+  // meta
+  $("#metaCat").textContent=state.cat.en;
+  $("#metaTitle").textContent=p.title;
+  $("#metaCenter").textContent="NASA · "+p.center;
+  $("#metaDate").textContent=p.date||"—";
+  $("#frame").textContent=String(i+1).padStart(3,"0");
+  $("#frameTot").textContent=String(state.photos.length).padStart(3,"0");
+  // pseudo coordinates derived from index, for flavor
+  $("#ra").textContent=`${String(6+i%18).padStart(2,"0")} ${String((i*7)%60).padStart(2,"0")} ${String((i*13)%60).padStart(2,"0")}`;
+  $("#dec").textContent=`${i%2?"-":"+"}${String(10+i*3%70).padStart(2,"0")} ${String((i*11)%60).padStart(2,"0")}`;
+
+  updateProgress();
+  updateFavBtn();
+  if(!instant) runScan();
+}
+
+function next(){ showPhoto(state.idx+1); }
+function prev(){ showPhoto(state.idx-1); }
+
+function runScan(){
+  const s=$("#scan");
+  s.classList.remove("run");void s.offsetWidth;s.classList.add("run");
+}
+
+/* progress dots */
+function buildProgress(){
+  const wrap=$("#progress");wrap.innerHTML="";
+  const n=Math.min(state.photos.length,8);
+  for(let i=0;i<n;i++){const d=document.createElement("i");wrap.appendChild(d);}
+  updateProgress();
+}
+function updateProgress(){
+  const dots=$$("#progress i");if(!dots.length)return;
+  const seg=Math.floor(state.idx/state.photos.length*dots.length);
+  dots.forEach((d,i)=>d.classList.toggle("on",i===Math.min(seg,dots.length-1)));
+}
+
+/* ===================== clock ===================== */
+function tick(){
+  const now=new Date();
+  let h=now.getHours(),m=now.getMinutes();
+  const ap=h<12?"AM":"PM";
+  if(!state.settings.h24){h=h%12||12;}
+  const hh=String(h).padStart(2,"0"),mm=String(m).padStart(2,"0");
+  const tstr=`${hh}:${mm}`;
+  $("#clock").textContent=tstr;
+  $("#sbTime").textContent=tstr+(state.settings.h24?"":" "+ap);
+  $("#lkTime").textContent=tstr;
+
+  const days=["日","月","火","水","木","金","土"];
+  const dstr=`${now.getMonth()+1}月${now.getDate()}日 (${days[now.getDay()]})`;
+  $("#cdate").textContent=dstr;
+  $("#lkDate").textContent=dstr;
+}
+
+/* ===================== settings application ===================== */
+function applySettings(){
+  const s=state.settings;
+  $("#clockWrap").style.display=s.clock?"":"none";
+  $("#clockWrap").className=`clock-wrap pos-${s.clockPos} size-${s.clockSize}`;
+  $("#telLeft").style.display=s.tel?"":"none";
+  $("#telRight").style.display=s.tel?"":"none";
+  $("#reticle").style.display=s.reticle?"":"none";
+  $("#meta").style.display=s.meta?"":"none";
+  // auto advance
+  if(state.autoTimer){clearInterval(state.autoTimer);state.autoTimer=null;}
+  if(s.auto){ state.autoTimer=setInterval(next, s.interval*1000); }
+  // ken burns refresh on current
+  const cur=state.activeSlide==="A"?$("#slideB"):$("#slideA"); // active one
+  $$(".slide.active").forEach(el=>el.classList.toggle("kenburns", s.ken && s.auto));
+}
+
+/* sleep timer */
+function setSleep(min){
+  state.settings.sleep=min;
+  if(state.sleepTimer){clearTimeout(state.sleepTimer);state.sleepTimer=null;}
+  $("#dim").classList.remove("on");
+  if(min>0){
+    state.sleepTimer=setTimeout(()=>{ $("#dim").classList.add("on"); }, min*60*1000);
+    toast(`<span class="a">☾</span> おやすみタイマー ` + (min<1?"即時で暗転":`${min}分後に暗転`));
+  }
+}
+
+/* ===================== favorites ===================== */
+function currentPhoto(){return state.photos[state.idx];}
+function isFav(p){return state.fav.some(f=>f.id===p.id);}
+function toggleFav(){
+  const p=currentPhoto();if(!p)return;
+  if(isFav(p)){ state.fav=state.fav.filter(f=>f.id!==p.id); toast("コレクションから外しました"); }
+  else{ state.fav.unshift({...p}); toast('<span class="a">♡</span> コレクションに保存しました'); }
+  updateFavBtn();renderFav();
+}
+function updateFavBtn(){
+  const p=currentPhoto();
+  $("#btnFav").classList.toggle("on", p&&isFav(p));
+}
+function renderFav(){
+  const grid=$("#favGrid"),empty=$("#favEmpty");
+  grid.innerHTML="";
+  if(!state.fav.length){empty.style.display="";return;}
+  empty.style.display="none";
+  state.fav.forEach((p)=>{
+    const cell=document.createElement("div");cell.className="fav-cell";
+    cell.innerHTML=`<div class="img" style="background-image:url('${p.thumb||p.img}')"></div>`;
+    cell.onclick=()=>{
+      // jump to this photo (load into viewer)
+      const exist=state.photos.findIndex(x=>x.id===p.id);
+      if(exist>=0){showPhoto(exist);}
+      else{state.photos.unshift(p);showPhoto(0);buildProgress();}
+      closeSheets();
+    };
+    grid.appendChild(cell);
+  });
+}
+
+/* ===================== sheets / modal ===================== */
+function openSheet(id){
+  closeSheets();
+  $(id).classList.add("open");
+}
+function closeSheets(){ $$(".sheet").forEach(s=>s.classList.remove("open")); }
+function openLock(){
+  const p=currentPhoto();if(!p)return;
+  $("#lkImg").style.backgroundImage=`url("${p.img}")`;
+  $("#lkFoot").textContent="— "+p.title+" —";
+  $("#lockModal").classList.add("open");
+}
+
+/* ===================== HUD toggle (tap to immerse) ===================== */
+function toggleHud(){
+  state.hudHidden=!state.hudHidden;
+  $("#hud").classList.toggle("hidden",state.hudHidden);
+}
+
+/* ===================== gestures ===================== */
+function initGestures(){
+  const v=$("#viewer");
+  let x0=null,y0=null,t0=0,moved=false;
+  const down=(x,y)=>{x0=x;y0=y;t0=Date.now();moved=false;};
+  const move=(x,y)=>{ if(x0!==null && (Math.abs(x-x0)>8||Math.abs(y-y0)>8)) moved=true; };
+  const up=(x,y)=>{
+    if(x0===null)return;
+    const dx=x-x0,dy=y-y0,dt=Date.now()-t0;
+    if(Math.abs(dx)>50 && Math.abs(dx)>Math.abs(dy)){ dx<0?next():prev(); }
+    else if(!moved && dt<300){ toggleHud(); } // tap
+    x0=y0=null;
+  };
+  v.addEventListener("touchstart",e=>down(e.touches[0].clientX,e.touches[0].clientY),{passive:true});
+  v.addEventListener("touchmove",e=>move(e.touches[0].clientX,e.touches[0].clientY),{passive:true});
+  v.addEventListener("touchend",e=>up(e.changedTouches[0].clientX,e.changedTouches[0].clientY));
+  let dragging=false;
+  v.addEventListener("mousedown",e=>{dragging=true;down(e.clientX,e.clientY);});
+  window.addEventListener("mousemove",e=>{if(dragging)move(e.clientX,e.clientY);});
+  window.addEventListener("mouseup",e=>{if(dragging){dragging=false;up(e.clientX,e.clientY);}});
+
+  document.addEventListener("keydown",e=>{
+    if($$(".sheet.open").length||$("#lockModal").classList.contains("open"))return;
+    if(e.key==="ArrowRight"||e.key==="ArrowDown"){next();e.preventDefault();}
+    if(e.key==="ArrowLeft"||e.key==="ArrowUp"){prev();e.preventDefault();}
+    if(e.key===" "){toggleHud();e.preventDefault();}
+  });
+}
+
+/* ===================== build chips & wire UI ===================== */
+function buildChips(){
+  const wrap=$("#catChips");wrap.innerHTML="";
+  CATEGORIES.forEach(cat=>{
+    const b=document.createElement("button");
+    b.className="chip"+(cat.q===state.cat.q?" on":"");
+    b.innerHTML=`${cat.ja}<span class="en">${cat.en}</span>`;
+    b.onclick=()=>{
+      $$("#catChips .chip").forEach(c=>c.classList.remove("on"));
+      b.classList.add("on");
+      loadCategory(cat);
+    };
+    wrap.appendChild(b);
+  });
+}
+
+function seg(id,cb){
+  $$(`${id} button`).forEach(btn=>{
+    btn.onclick=()=>{
+      $$(`${id} button`).forEach(x=>x.classList.remove("on"));
+      btn.classList.add("on");
+      cb(btn.dataset.v);
+    };
+  });
+}
+
+function wireUI(){
+  // dock
+  $("#btnFav").onclick=toggleFav;
+  $("#btnCollection").onclick=()=>{renderFav();openSheet("#sheetCollection");};
+  $("#btnLock").onclick=openLock;
+  $("#btnCustom").onclick=()=>openSheet("#sheetCustom");
+  $$("[data-close]").forEach(b=>b.onclick=closeSheets);
+  $$("[data-close-modal]").forEach(b=>b.onclick=()=>$("#lockModal").classList.remove("open"));
+  $("#lkSave").onclick=()=>{ $("#lockModal").classList.remove("open"); toast('<span class="a">✔</span> 待ち受けに設定しました（デモ）'); };
+
+  // toggles
+  const bind=(id,key,after)=>{ $(id).checked=state.settings[key]; $(id).onchange=e=>{state.settings[key]=e.target.checked;applySettings();after&&after();}; };
+  bind("#tgClock","clock"); bind("#tg24","h24",tick);
+  bind("#tgTel","tel"); bind("#tgReticle","reticle"); bind("#tgMeta","meta");
+  bind("#tgAuto","auto"); bind("#tgKen","ken");
+
+  // segments
+  seg("#segClockPos",v=>{state.settings.clockPos=v;applySettings();});
+  seg("#segClockSize",v=>{state.settings.clockSize=v;applySettings();});
+  seg("#segInterval",v=>{state.settings.interval=+v;applySettings();});
+  seg("#segSleep",v=>setSleep(+v));
+
+  // wake from sleep
+  $("#dim").addEventListener("click",()=>{ $("#dim").classList.remove("on"); if(state.sleepTimer)clearTimeout(state.sleepTimer); });
+}
+
+/* ===================== boot ===================== */
+function boot(){
+  buildChips();
+  wireUI();
+  applySettings();
+  initGestures();
+  tick();setInterval(tick,1000);
+  loadCategory(state.cat);
+  // hide hint after first interaction
+  const killHint=()=>{$("#hint").style.display="none";window.removeEventListener("pointerdown",killHint);};
+  window.addEventListener("pointerdown",killHint);
+  setTimeout(killHint,7000);
+}
+boot();
+</script>
+</body>
+</html>

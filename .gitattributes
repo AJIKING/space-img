@@ -1,0 +1,10 @@
+# リポジトリ内の改行は LF に統一(ローカル Windows と CI Linux の差異を防ぐ)。
+* text=auto eol=lf
+
+# バイナリは正規化しない。
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.ttf binary
+*.otf binary
