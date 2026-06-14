@@ -117,7 +117,7 @@ lib/
         │   └── orbit_theme.dart    # デザイントークン(色・フォント・spacing)
         ├── viewer/
         │   ├── viewer_screen.dart
-        │   ├── photo_layer.dart    # クロスフェード + Ken Burns + ビネット
+        │   ├── photo_layer.dart    # クロスフェード + ビネット
         │   ├── hud_overlay.dart    # 時計・テレメトリ・レチクル・メタ・進捗
         │   ├── dock.dart           # SAVE / SAVED / WALLPAPER / TUNE
         │   └── scan_overlay.dart   # 再取得スキャン演出

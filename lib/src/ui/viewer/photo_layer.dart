@@ -23,34 +23,28 @@ ImageProvider? photoImageProvider(String imageRef) {
 /// フォールバック**する。golden では実ファイルが無いためグラデで安定する
 /// (ADR 0002 の「写真はプレースホルダ」方針とも整合)。
 class PhotoLayer extends StatelessWidget {
-  const PhotoLayer({super.key, required this.photo, this.kenBurns = false});
+  const PhotoLayer({super.key, required this.photo});
 
   final Photo? photo;
-  final bool kenBurns;
 
   @override
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 700),
-      child: _Slide(
-        key: ValueKey(photo?.id ?? '__empty__'),
-        photo: photo,
-        kenBurns: kenBurns,
-      ),
+      child: _Slide(key: ValueKey(photo?.id ?? '__empty__'), photo: photo),
     );
   }
 }
 
 class _Slide extends StatelessWidget {
-  const _Slide({super.key, required this.photo, required this.kenBurns});
+  const _Slide({super.key, required this.photo});
 
   final Photo? photo;
-  final bool kenBurns;
 
   @override
   Widget build(BuildContext context) {
     final provider = photo == null ? null : photoImageProvider(photo!.imageRef);
-    final content = Stack(
+    return Stack(
       fit: StackFit.expand,
       children: [
         // 常にカテゴリ別グラデを下敷きに(画像読込中・失敗時のフォールバック)。
@@ -67,10 +61,6 @@ class _Slide extends StatelessWidget {
           ),
         const _Vignette(),
       ],
-    );
-    // Ken Burns はゆっくりズーム。アニメーションはアンビエント実装で本格化する。
-    return SizedBox.expand(
-      child: kenBurns ? Transform.scale(scale: 1.08, child: content) : content,
     );
   }
 }

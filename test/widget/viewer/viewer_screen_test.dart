@@ -293,26 +293,4 @@ void main() {
 
     await dispose(tester);
   });
-
-  testWidgets('おやすみタイマーで暗転し、タップで復帰する', (tester) async {
-    final pool = nebulaPool(['a']);
-    final viewer = ViewerController(pool: pool.pool, random: Random(0));
-    await pumpScreen(
-      tester,
-      viewer: viewer,
-      pool: pool,
-      settings: settingsOf(const ViewerSettings(sleepMinutes: 15)),
-      collection: collectionOf(),
-    );
-    expect(find.byKey(const Key('sleep-dim')), findsNothing);
-
-    await tester.pump(const Duration(minutes: 15));
-    expect(find.byKey(const Key('sleep-dim')), findsOneWidget);
-
-    await tester.tap(find.byKey(const Key('sleep-dim')));
-    await tester.pump();
-    expect(find.byKey(const Key('sleep-dim')), findsNothing);
-
-    await dispose(tester);
-  });
 }

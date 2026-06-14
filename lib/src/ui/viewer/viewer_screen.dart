@@ -11,7 +11,6 @@ import '../../core/clock.dart';
 import '../../domain/photos/photo.dart';
 import '../collection/collection_sheet.dart';
 import '../customize/customize_sheet.dart';
-import '../theme/orbit_theme.dart';
 import '../wallpaper/wallpaper_preview.dart';
 import 'dock.dart';
 import 'hud_overlay.dart';
@@ -19,7 +18,7 @@ import 'photo_layer.dart';
 import 'scan_overlay.dart';
 
 /// メイン画面。写真レイヤ・HUD・ドックを重ね、ジェスチャー・時計更新・
-/// 自動スライド・おやすみタイマーを司る。
+/// 自動スライドを司る。
 ///
 /// 表示は [ViewerController] のプールからのみ行い、通信しない(ADR 0001)。
 class ViewerScreen extends StatefulWidget {
@@ -47,8 +46,6 @@ class _ViewerScreenState extends State<ViewerScreen> {
   late PhotoCategory _appliedCategory;
   Timer? _ticker;
   Timer? _autoTimer;
-  Timer? _sleepTimer;
-  bool _dimmed = false;
 
   /// 横ドラッグの累積量(スワイプ判定用)。
   double _dragDx = 0;
@@ -63,7 +60,6 @@ class _ViewerScreenState extends State<ViewerScreen> {
     });
     widget.settings.addListener(_onSettingsChanged);
     _applyAutoAdvance();
-    _applySleep();
   }
 
   @override
@@ -71,13 +67,11 @@ class _ViewerScreenState extends State<ViewerScreen> {
     widget.settings.removeListener(_onSettingsChanged);
     _ticker?.cancel();
     _autoTimer?.cancel();
-    _sleepTimer?.cancel();
     super.dispose();
   }
 
   void _onSettingsChanged() {
     _applyAutoAdvance();
-    _applySleep();
     final category = widget.settings.settings.category;
     if (category != _appliedCategory) {
       _appliedCategory = category;
@@ -104,23 +98,6 @@ class _ViewerScreenState extends State<ViewerScreen> {
         (_) => widget.controller.next(),
       );
     }
-  }
-
-  /// おやすみタイマー: [ViewerSettings.sleepMinutes] 後に画面を暗転させる。
-  void _applySleep() {
-    _sleepTimer?.cancel();
-    final minutes = widget.settings.settings.sleepMinutes;
-    if (minutes > 0 && !_dimmed) {
-      _sleepTimer = Timer(
-        Duration(minutes: minutes),
-        () => setState(() => _dimmed = true),
-      );
-    }
-  }
-
-  void _wake() {
-    setState(() => _dimmed = false);
-    _applySleep(); // 再び計時を始める
   }
 
   void _onKey(KeyEvent event) {
@@ -173,10 +150,7 @@ class _ViewerScreenState extends State<ViewerScreen> {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      PhotoLayer(
-                        photo: photo,
-                        kenBurns: s.kenBurns && s.autoAdvance,
-                      ),
+                      PhotoLayer(photo: photo),
                       ScanOverlay(trigger: photo?.id),
                       IgnorePointer(
                         child: AnimatedOpacity(
@@ -222,43 +196,9 @@ class _ViewerScreenState extends State<ViewerScreen> {
                     ),
                   ),
                 ),
-                if (_dimmed) _DimOverlay(onWake: _wake),
               ],
             );
           },
-        ),
-      ),
-    );
-  }
-}
-
-/// おやすみ暗転オーバーレイ。タップで復帰する。
-class _DimOverlay extends StatelessWidget {
-  const _DimOverlay({required this.onWake});
-
-  final VoidCallback onWake;
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned.fill(
-      child: GestureDetector(
-        key: const Key('sleep-dim'),
-        behavior: HitTestBehavior.opaque,
-        onTap: onWake,
-        child: const ColoredBox(
-          color: Color(0xF5000000),
-          child: Center(
-            child: Text(
-              'SLEEP MODE\nタップで再起動',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: OrbitColors.muted,
-                fontSize: 11,
-                height: 2,
-                letterSpacing: 2,
-              ),
-            ),
-          ),
         ),
       ),
     );

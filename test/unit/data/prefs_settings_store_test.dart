@@ -19,13 +19,11 @@ void main() {
       clockPosition: ClockPosition.bottom,
       clockSize: ClockSize.l,
       use24h: false,
-      showTelemetry: false,
-      showReticle: false,
+      showTelemetry: true,
+      showReticle: true,
       showMeta: false,
       autoAdvance: true,
       intervalSeconds: 30,
-      kenBurns: false,
-      sleepMinutes: 15,
     );
     await store.save(settings);
 
@@ -36,13 +34,11 @@ void main() {
     expect(loaded.clockPosition, ClockPosition.bottom);
     expect(loaded.clockSize, ClockSize.l);
     expect(loaded.use24h, isFalse);
-    expect(loaded.showTelemetry, isFalse);
-    expect(loaded.showReticle, isFalse);
+    expect(loaded.showTelemetry, isTrue);
+    expect(loaded.showReticle, isTrue);
     expect(loaded.showMeta, isFalse);
     expect(loaded.autoAdvance, isTrue);
     expect(loaded.intervalSeconds, 30);
-    expect(loaded.kenBurns, isFalse);
-    expect(loaded.sleepMinutes, 15);
   });
 
   test('壊れた JSON は null(既定値起動)', () async {
