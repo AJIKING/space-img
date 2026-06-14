@@ -176,7 +176,17 @@ class _ViewerScreenState extends State<ViewerScreen> {
                       isSaved:
                           photo != null && widget.collection.isFavorite(photo),
                       onSave: () {
-                        if (photo != null) widget.collection.toggle(photo);
+                        if (photo == null) return;
+                        final wasSaved = widget.collection.isFavorite(photo);
+                        widget.collection.toggle(photo);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              wasSaved ? 'コレクションから外しました' : 'コレクションに保存しました',
+                            ),
+                            duration: const Duration(seconds: 1),
+                          ),
+                        );
                       },
                       onCollection: () => showCollectionSheet(
                         context,

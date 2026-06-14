@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/photos/photo.dart';
-import '../theme/orbit_theme.dart';
+import '../category_gradient.dart';
 import '../viewer/photo_layer.dart' show photoImageProvider;
 
 /// 写真のサムネイル(コレクションセル等)。実画像を [BoxFit.cover] で表示し、
-/// 読めなければ暗い背景にフォールバックする。
+/// 読めなければ**カテゴリ別グラデーション**にフォールバックする(真っ黒で
+/// 「空」に見えるのを避ける)。
 class PhotoThumbnail extends StatelessWidget {
   const PhotoThumbnail({
     super.key,
@@ -22,7 +23,9 @@ class PhotoThumbnail extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        const ColoredBox(color: OrbitColors.void2),
+        DecoratedBox(
+          decoration: BoxDecoration(gradient: categoryGradient(photo.category)),
+        ),
         if (provider != null)
           Image(
             image: provider,
