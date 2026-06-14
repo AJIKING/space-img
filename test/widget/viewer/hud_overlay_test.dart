@@ -27,18 +27,17 @@ void main() {
     );
   }
 
-  testWidgets('既定設定では時計・テレメトリ・レチクル・メタ・進捗が出る', (tester) async {
+  testWidgets('既定では時計・写真情報・進捗が出る(テレメトリ/レチクルは非表示)', (tester) async {
     await pumpHud(tester, settings: const ViewerSettings());
 
     expect(find.byKey(const Key('hud-clock')), findsOneWidget);
     expect(find.text('09:05'), findsWidgets);
-    expect(find.byKey(const Key('hud-telemetry-left')), findsOneWidget);
-    expect(find.byKey(const Key('hud-telemetry-right')), findsOneWidget);
-    expect(find.byKey(const Key('hud-reticle')), findsOneWidget);
     expect(find.byKey(const Key('hud-meta')), findsOneWidget);
     expect(find.byKey(const Key('hud-progress')), findsOneWidget);
-    expect(find.text('title-a'), findsOneWidget);
     expect(find.text('ORBIT'), findsOneWidget);
+    // 観測機器の装飾は既定で非表示。
+    expect(find.byKey(const Key('hud-telemetry-left')), findsNothing);
+    expect(find.byKey(const Key('hud-reticle')), findsNothing);
   });
 
   testWidgets('showClock=false で時計が消える', (tester) async {
@@ -46,15 +45,15 @@ void main() {
     expect(find.byKey(const Key('hud-clock')), findsNothing);
   });
 
-  testWidgets('showTelemetry=false でテレメトリが消える', (tester) async {
-    await pumpHud(tester, settings: const ViewerSettings(showTelemetry: false));
-    expect(find.byKey(const Key('hud-telemetry-left')), findsNothing);
-    expect(find.byKey(const Key('hud-telemetry-right')), findsNothing);
+  testWidgets('showTelemetry=true でテレメトリが出る', (tester) async {
+    await pumpHud(tester, settings: const ViewerSettings(showTelemetry: true));
+    expect(find.byKey(const Key('hud-telemetry-left')), findsOneWidget);
+    expect(find.byKey(const Key('hud-telemetry-right')), findsOneWidget);
   });
 
-  testWidgets('showReticle=false でレチクルが消える', (tester) async {
-    await pumpHud(tester, settings: const ViewerSettings(showReticle: false));
-    expect(find.byKey(const Key('hud-reticle')), findsNothing);
+  testWidgets('showReticle=true でレチクルが出る', (tester) async {
+    await pumpHud(tester, settings: const ViewerSettings(showReticle: true));
+    expect(find.byKey(const Key('hud-reticle')), findsOneWidget);
   });
 
   testWidgets('showMeta=false で写真情報が消える', (tester) async {

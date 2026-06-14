@@ -5,6 +5,7 @@ import 'package:orbit/src/domain/photos/photo.dart';
 import 'package:orbit/src/domain/pool/image_cache_cleaner.dart';
 import 'package:orbit/src/domain/pool/photo_pool.dart';
 
+import '../../fixtures/in_memory_collection_store.dart';
 import '../../fixtures/in_memory_image_store.dart';
 import '../../fixtures/in_memory_pool_store.dart';
 import '../../fixtures/sample_photos.dart';
@@ -24,18 +25,37 @@ void main() {
       imageStore.data[id] = Uint8List(0);
     }
 
-    await ImageCacheCleaner(store: store, imageStore: imageStore).prune();
+    await ImageCacheCleaner(
+      store: store,
+      imageStore: imageStore,
+      collectionStore: InMemoryCollectionStore(),
+    ).prune();
 
     expect(imageStore.data.keys.toSet(), {'a', 'b', 'c'});
   });
 
-  test('全カテゴリ空なら全画像を消す', () async {
+  test('プールに無くてもお気に入りの画像は残す', () async {
+    final imageStore = InMemoryImageStore();
+    imageStore.data['fav'] = Uint8List(0);
+    imageStore.data['orphan'] = Uint8List(0);
+
+    await ImageCacheCleaner(
+      store: InMemoryPoolStore(), // どのカテゴリにもプール無し
+      imageStore: imageStore,
+      collectionStore: InMemoryCollectionStore([samplePhoto('fav')]),
+    ).prune();
+
+    expect(imageStore.data.keys.toSet(), {'fav'});
+  });
+
+  test('全カテゴリ空・お気に入り無しなら全画像を消す', () async {
     final imageStore = InMemoryImageStore();
     imageStore.data['x'] = Uint8List(0);
 
     await ImageCacheCleaner(
       store: InMemoryPoolStore(),
       imageStore: imageStore,
+      collectionStore: InMemoryCollectionStore(),
     ).prune();
 
     expect(imageStore.data, isEmpty);
@@ -51,7 +71,11 @@ void main() {
     imageStore.data['m'] = Uint8List(0);
     imageStore.data['orphan'] = Uint8List(0);
 
-    await ImageCacheCleaner(store: store, imageStore: imageStore).prune();
+    await ImageCacheCleaner(
+      store: store,
+      imageStore: imageStore,
+      collectionStore: InMemoryCollectionStore(),
+    ).prune();
 
     expect(imageStore.data.keys.toSet(), {'m'});
   });

@@ -45,7 +45,8 @@ Future<void> main() async {
   await settings.load();
 
   // お気に入りを読み込む。
-  final collection = CollectionController(store: PrefsCollectionStore());
+  final collectionStore = PrefsCollectionStore();
+  final collection = CollectionController(store: collectionStore);
   await collection.load();
 
   final pool = PoolController(
@@ -53,7 +54,12 @@ Future<void> main() async {
     refresher: refresher,
     seedPools: buildSeedPools(),
     initialCategory: settings.settings.category,
-    cleaner: ImageCacheCleaner(store: poolStore, imageStore: imageStore),
+    // 掃除はお気に入りも keep する(プールから外れても画像を残す)。
+    cleaner: ImageCacheCleaner(
+      store: poolStore,
+      imageStore: imageStore,
+      collectionStore: collectionStore,
+    ),
   );
 
   // 表示に使うプールを確定(通信しない)。

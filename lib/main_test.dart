@@ -55,7 +55,8 @@ Future<void> main() async {
 
   final settings = SettingsController(store: PrefsSettingsStore());
   await settings.load();
-  final collection = CollectionController(store: PrefsCollectionStore());
+  final collectionStore = PrefsCollectionStore();
+  final collection = CollectionController(store: collectionStore);
   await collection.load();
 
   final pool = PoolController(
@@ -63,7 +64,11 @@ Future<void> main() async {
     refresher: refresher,
     seedPools: buildSeedPools(),
     initialCategory: settings.settings.category,
-    cleaner: ImageCacheCleaner(store: poolStore, imageStore: imageStore),
+    cleaner: ImageCacheCleaner(
+      store: poolStore,
+      imageStore: imageStore,
+      collectionStore: collectionStore,
+    ),
   );
   await pool.load();
 

@@ -48,15 +48,14 @@ class HudOverlay extends StatelessWidget {
           ),
         ),
 
-        // コーナーブラケット
-        const _Bracket(top: 70, left: 18),
-        const _Bracket(top: 70, right: 18),
-        const _Bracket(bottom: 150, left: 18),
-        const _Bracket(bottom: 150, right: 18),
-
-        // レチクル(中央照準)
-        if (settings.showReticle)
+        // レチクル(中央照準 + 四隅のコーナーブラケット)。既定では非表示。
+        if (settings.showReticle) ...[
+          const _Bracket(top: 70, left: 18),
+          const _Bracket(top: 70, right: 18),
+          const _Bracket(bottom: 190, left: 18),
+          const _Bracket(bottom: 190, right: 18),
           const Align(key: Key('hud-reticle'), child: _Reticle()),
+        ],
 
         // テレメトリ
         if (settings.showTelemetry) ...[
@@ -109,7 +108,8 @@ class HudOverlay extends StatelessWidget {
             key: const Key('hud-meta'),
             left: 26,
             right: 26,
-            bottom: 108,
+            // ドック(下部ナビ)と被らないよう十分上に置く。
+            bottom: 156,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -140,7 +140,7 @@ class HudOverlay extends StatelessWidget {
             key: const Key('hud-progress'),
             left: 0,
             right: 0,
-            bottom: 92,
+            bottom: 138,
             child: _Progress(index: index, total: total),
           ),
       ],

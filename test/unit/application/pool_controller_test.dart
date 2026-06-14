@@ -10,6 +10,7 @@ import 'package:orbit/src/domain/pool/pool_refresher.dart';
 
 import '../../fixtures/fake_clock.dart';
 import '../../fixtures/fake_photo_source.dart';
+import '../../fixtures/in_memory_collection_store.dart';
 import '../../fixtures/in_memory_image_store.dart';
 import '../../fixtures/in_memory_pool_store.dart';
 import '../../fixtures/sample_photos.dart';
@@ -40,7 +41,11 @@ void main() {
       seedPools: seedPools ?? const {},
       initialCategory: initialCategory,
       cleaner: withCleaner
-          ? ImageCacheCleaner(store: s, imageStore: img)
+          ? ImageCacheCleaner(
+              store: s,
+              imageStore: img,
+              collectionStore: InMemoryCollectionStore(),
+            )
           : null,
     );
   }

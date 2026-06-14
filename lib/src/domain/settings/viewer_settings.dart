@@ -17,8 +17,10 @@ class ViewerSettings {
     this.clockPosition = ClockPosition.top,
     this.clockSize = ClockSize.m,
     this.use24h = true,
-    this.showTelemetry = true,
-    this.showReticle = true,
+    // 観測機器の装飾(座標テレメトリ / レチクル + 四隅ブラケット)は既定で非表示。
+    // TUNE で ON にできる。
+    this.showTelemetry = false,
+    this.showReticle = false,
     this.showMeta = true,
     this.autoAdvance = false,
     this.intervalSeconds = 6,
