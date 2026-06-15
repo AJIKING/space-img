@@ -13,6 +13,7 @@ import '../../domain/platform/screen_wake.dart';
 import '../../domain/platform/wallpaper_service.dart';
 import '../collection/collection_sheet.dart';
 import '../customize/customize_sheet.dart';
+import '../theme/orbit_theme.dart';
 import '../wallpaper/wallpaper_preview.dart';
 import 'dock.dart';
 import 'hud_overlay.dart';
@@ -142,7 +143,12 @@ class _ViewerScreenState extends State<ViewerScreen> {
           return KeyEventResult.handled;
         },
         child: AnimatedBuilder(
-          animation: Listenable.merge([c, widget.settings, widget.collection]),
+          animation: Listenable.merge([
+            c,
+            widget.settings,
+            widget.collection,
+            widget.pool,
+          ]),
           builder: (context, _) {
             final photo = c.current;
             final s = widget.settings.settings;
@@ -234,10 +240,56 @@ class _ViewerScreenState extends State<ViewerScreen> {
                     ),
                   ),
                 ),
+                // 補充(ダウンロード)中だけ表示する控えめなインジケータ。
+                // 初回起動でシード表示中に「取得しているか」が分かる。
+                if (widget.pool.isRefreshing)
+                  const Align(
+                    alignment: Alignment(0, -0.92),
+                    child: SafeArea(child: _LoadingChip()),
+                  ),
               ],
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+/// 取得中の控えめなチップ(スピナー + 「取得中…」)。
+class _LoadingChip extends StatelessWidget {
+  const _LoadingChip();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const Key('loading-indicator'),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xCC0A0E1A),
+        border: Border.all(color: OrbitColors.line),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(
+            width: 14,
+            height: 14,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation(OrbitColors.amber),
+            ),
+          ),
+          const SizedBox(width: 9),
+          Text(
+            '取得中…',
+            style: OrbitText.mono.copyWith(
+              fontSize: 11,
+              color: OrbitColors.muted,
+            ),
+          ),
+        ],
       ),
     );
   }

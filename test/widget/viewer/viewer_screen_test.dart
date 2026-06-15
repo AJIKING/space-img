@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -122,6 +123,38 @@ void main() {
     await tester.pump();
     expect(collection.favorites, isEmpty);
     expect(viewer.hudHidden, isFalse);
+
+    await dispose(tester);
+  });
+
+  testWidgets('補充中は取得中インジケータを表示する', (tester) async {
+    final gate = Completer<void>();
+    final source = FakePhotoSource(
+      candidates: [sampleRemote('x')],
+      fetchGate: gate.future,
+    );
+    final pool = poolWith({
+      PhotoCategory.nebula: PhotoPool(photos: [samplePhoto('seed')]),
+    }, source: source);
+    final viewer = ViewerController(pool: pool.pool, random: Random(0));
+    await pumpScreen(
+      tester,
+      viewer: viewer,
+      pool: pool,
+      settings: settingsOf(),
+      collection: collectionOf(),
+    );
+    expect(find.byKey(const Key('loading-indicator')), findsNothing);
+
+    unawaited(pool.refresh());
+    await tester.pump(); // isRefreshing → 表示
+    expect(find.byKey(const Key('loading-indicator')), findsOneWidget);
+
+    gate.complete();
+    for (var i = 0; i < 4; i++) {
+      await tester.pump(const Duration(milliseconds: 10));
+    }
+    expect(find.byKey(const Key('loading-indicator')), findsNothing);
 
     await dispose(tester);
   });

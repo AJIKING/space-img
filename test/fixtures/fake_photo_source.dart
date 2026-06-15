@@ -12,12 +12,16 @@ class FakePhotoSource implements PhotoSource {
     List<RemotePhoto>? candidates,
     Set<String>? failingDownloadUrls,
     this.throwOnFetch = false,
+    this.fetchGate,
   }) : candidates = candidates ?? const [],
        failingDownloadUrls = failingDownloadUrls ?? const {};
 
   List<RemotePhoto> candidates;
   Set<String> failingDownloadUrls;
   bool throwOnFetch;
+
+  /// 設定すると fetchCandidates がこの Future の完了まで待つ(補充中状態の検証用)。
+  Future<void>? fetchGate;
 
   int fetchCount = 0;
   int downloadCount = 0;
@@ -30,6 +34,7 @@ class FakePhotoSource implements PhotoSource {
   }) async {
     fetchCount++;
     requestedCategories.add(category);
+    if (fetchGate != null) await fetchGate;
     if (throwOnFetch) {
       throw const PhotoSourceException('fetch failed (fake)');
     }
