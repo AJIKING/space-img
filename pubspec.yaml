@@ -33,10 +33,22 @@ dev_dependencies:
   # integration smoke test(integration_test/)用
   integration_test:
     sdk: flutter
-  # おやすみタイマー / 自動スライド(Timer.periodic)を実時間なしでテストするため
+  # 自動スライド(Timer.periodic)を実時間なしでテストするため
   fake_async: ^1.3.0
+  # アプリアイコン生成(assets/icon/orbit_icon.png → iOS/Android)
+  flutter_launcher_icons: ^0.14.4
 
   flutter_lints: ^6.0.0
+
+# アプリアイコン設定。元画像は docs/prototype/orbit-app-icon.svg を 1024px に
+# ラスタライズしたもの。生成: dart run flutter_launcher_icons
+flutter_launcher_icons:
+  image_path: "assets/icon/orbit_icon.png"
+  android: true
+  ios: true
+  # App Store のアイコンは透過不可なので背景色で塗りつぶす。
+  remove_alpha_ios: true
+  background_color_ios: "#04060e"
 
 flutter:
   uses-material-design: true
