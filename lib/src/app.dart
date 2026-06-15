@@ -34,7 +34,7 @@ class OrbitApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ORBIT',
+      title: 'Apogee',
       debugShowCheckedModeBanner: false,
       theme: buildOrbitTheme(),
       home: ViewerScreen(

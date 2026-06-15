@@ -5,7 +5,7 @@
     <!-- 壁紙の直接適用(async_wallpaper)に必要。 -->
     <uses-permission android:name="android.permission.SET_WALLPAPER"/>
     <application
-        android:label="orbit"
+        android:label="Apogee"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
