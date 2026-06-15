@@ -9,7 +9,7 @@ import '../domain/pool/photo_pool.dart';
 const List<Photo> kSeedPhotos = [
   Photo(
     id: 'PIA14417',
-    title: 'ダンベル星雲(M27)',
+    title: 'Dumbbell Nebula (M27)',
     center: 'JPL',
     category: PhotoCategory.nebula,
     imageRef: 'assets/seed/nebula_1.jpg',
@@ -17,7 +17,7 @@ const List<Photo> kSeedPhotos = [
   ),
   Photo(
     id: 'PIA04921',
-    title: 'アンドロメダ銀河(M31)',
+    title: 'Andromeda Galaxy (M31)',
     center: 'JPL',
     category: PhotoCategory.galaxy,
     imageRef: 'assets/seed/galaxy_1.jpg',
@@ -25,7 +25,7 @@ const List<Photo> kSeedPhotos = [
   ),
   Photo(
     id: 'sl4-143-4707',
-    title: '地球軌道のスカイラブ',
+    title: 'Earth from Skylab',
     center: 'JSC',
     category: PhotoCategory.earth,
     imageRef: 'assets/seed/earth_1.jpg',
@@ -33,7 +33,7 @@ const List<Photo> kSeedPhotos = [
   ),
   Photo(
     id: 'PIA05445',
-    title: '火星表面(オポチュニティ)',
+    title: 'Mars Surface (Opportunity)',
     center: 'JPL',
     category: PhotoCategory.mars,
     imageRef: 'assets/seed/mars_1.jpg',
@@ -41,7 +41,7 @@ const List<Photo> kSeedPhotos = [
   ),
   Photo(
     id: 'PIA12235',
-    title: '月の表側',
+    title: 'Nearside of the Moon',
     center: 'JPL',
     category: PhotoCategory.moon,
     imageRef: 'assets/seed/moon_1.jpg',
@@ -49,7 +49,7 @@ const List<Photo> kSeedPhotos = [
   ),
   Photo(
     id: 'PIA01527',
-    title: '木星の嵐',
+    title: 'Jupiter Storms',
     center: 'JPL',
     category: PhotoCategory.jupiter,
     imageRef: 'assets/seed/jupiter_1.jpg',
@@ -57,7 +57,7 @@ const List<Photo> kSeedPhotos = [
   ),
   Photo(
     id: 'PIA26681',
-    title: '太陽(SDO)',
+    title: 'The Sun (SDO)',
     center: 'JPL',
     category: PhotoCategory.sun,
     imageRef: 'assets/seed/sun_1.jpg',
@@ -65,7 +65,7 @@ const List<Photo> kSeedPhotos = [
   ),
   Photo(
     id: 'PIA12110',
-    title: 'ハッブル・ディープフィールド',
+    title: 'Hubble Deep Field',
     center: 'STScI',
     category: PhotoCategory.deepField,
     imageRef: 'assets/seed/deepfield_1.jpg',
@@ -73,7 +73,7 @@ const List<Photo> kSeedPhotos = [
   ),
   Photo(
     id: 'hubble-jupiter-auroras-28000029525',
-    title: '木星のオーロラ(Hubble)',
+    title: 'Auroras on Jupiter (Hubble)',
     center: 'GSFC',
     category: PhotoCategory.aurora,
     imageRef: 'assets/seed/aurora_1.jpg',
@@ -81,7 +81,7 @@ const List<Photo> kSeedPhotos = [
   ),
   Photo(
     id: 'PIA06423',
-    title: '土星',
+    title: 'Saturn',
     center: 'JPL',
     category: PhotoCategory.saturn,
     imageRef: 'assets/seed/saturn_1.jpg',
