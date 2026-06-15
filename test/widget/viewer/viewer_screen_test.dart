@@ -127,6 +127,59 @@ void main() {
     await dispose(tester);
   });
 
+  testWidgets('空表示(写真なし)では再取得ボタンを出し、押すと補充する', (tester) async {
+    final source = FakePhotoSource(candidates: [sampleRemote('x')]);
+    final pool = poolWith(const <PhotoCategory, PhotoPool>{}, source: source);
+    final viewer = ViewerController(pool: pool.pool, random: Random(0));
+    await pumpScreen(
+      tester,
+      viewer: viewer,
+      pool: pool,
+      settings: settingsOf(),
+      collection: collectionOf(),
+    );
+
+    expect(find.text('まだ写真がありません'), findsOneWidget);
+    expect(find.byKey(const Key('empty-retry')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('empty-retry')));
+    for (var i = 0; i < 4; i++) {
+      await tester.pump(const Duration(milliseconds: 10));
+    }
+    expect(source.fetchCount, 1);
+
+    await dispose(tester);
+  });
+
+  testWidgets('空表示で取得中はスピナーと「宇宙を取得中…」を出す', (tester) async {
+    final gate = Completer<void>();
+    final source = FakePhotoSource(
+      candidates: [sampleRemote('x')],
+      fetchGate: gate.future,
+    );
+    final pool = poolWith(const <PhotoCategory, PhotoPool>{}, source: source);
+    final viewer = ViewerController(pool: pool.pool, random: Random(0));
+    await pumpScreen(
+      tester,
+      viewer: viewer,
+      pool: pool,
+      settings: settingsOf(),
+      collection: collectionOf(),
+    );
+    expect(find.byKey(const Key('empty-retry')), findsOneWidget);
+
+    unawaited(pool.refresh());
+    await tester.pump();
+    expect(find.text('宇宙を取得中…'), findsOneWidget);
+    expect(find.byKey(const Key('empty-retry')), findsNothing);
+
+    gate.complete();
+    for (var i = 0; i < 4; i++) {
+      await tester.pump(const Duration(milliseconds: 10));
+    }
+    await dispose(tester);
+  });
+
   // 注意: 取得中インジケータ(無限スピナー)表示中に pumpAndSettle は使わない
   // (settle せずハングする)。補充中は pump(Duration) で進めること。
   testWidgets('補充中は取得中インジケータを表示する', (tester) async {

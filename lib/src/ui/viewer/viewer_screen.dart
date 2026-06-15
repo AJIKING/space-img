@@ -116,6 +116,13 @@ class _ViewerScreenState extends State<ViewerScreen> {
     widget.screenWake.setEnabled(widget.settings.settings.keepAwake);
   }
 
+  /// 空表示からの手動再取得。補充して、取れたら表示に反映する。
+  Future<void> _retry() async {
+    await widget.pool.refresh();
+    if (!mounted) return;
+    widget.controller.adoptPool(widget.pool.pool);
+  }
+
   void _onKey(KeyEvent event) {
     if (event is! KeyDownEvent) return;
     final c = widget.controller;
@@ -240,9 +247,17 @@ class _ViewerScreenState extends State<ViewerScreen> {
                     ),
                   ),
                 ),
-                // 補充(ダウンロード)中だけ表示する控えめなインジケータ。
-                // 初回起動でシード表示中に「取得しているか」が分かる。
-                if (widget.pool.isRefreshing)
+                // 表示できる写真が無い(テーマ色だけ)ときは、中央で状態を明示する
+                // (取得中=スピナー / 未取得・失敗=再取得ボタン)。
+                if (photo == null)
+                  Center(
+                    child: _EmptyState(
+                      refreshing: widget.pool.isRefreshing,
+                      onRetry: _retry,
+                    ),
+                  )
+                // 写真は出ているが背景で補充中のときは、上部に控えめなチップ。
+                else if (widget.pool.isRefreshing)
                   const Align(
                     alignment: Alignment(0, -0.92),
                     child: SafeArea(child: _LoadingChip()),
@@ -291,6 +306,70 @@ class _LoadingChip extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// 表示できる写真が無いときの中央表示。取得中はスピナー、未取得・失敗は再取得。
+class _EmptyState extends StatelessWidget {
+  const _EmptyState({required this.refreshing, required this.onRetry});
+
+  final bool refreshing;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    if (refreshing) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(
+            width: 38,
+            height: 38,
+            child: CircularProgressIndicator(
+              strokeWidth: 3,
+              valueColor: AlwaysStoppedAnimation(OrbitColors.amber),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '宇宙を取得中…',
+            style: OrbitText.mono.copyWith(
+              fontSize: 13,
+              color: OrbitColors.hud,
+              letterSpacing: 1,
+            ),
+          ),
+        ],
+      );
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.cloud_off, color: OrbitColors.muted, size: 42),
+        const SizedBox(height: 14),
+        Text(
+          'まだ写真がありません',
+          style: OrbitText.display.copyWith(
+            fontSize: 16,
+            color: OrbitColors.hud,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          '通信環境を確認して再取得してください',
+          style: OrbitText.mono.copyWith(
+            fontSize: 11,
+            color: OrbitColors.muted,
+          ),
+        ),
+        const SizedBox(height: 18),
+        OutlinedButton(
+          key: const Key('empty-retry'),
+          onPressed: onRetry,
+          child: const Text('再取得', style: TextStyle(color: OrbitColors.hud)),
+        ),
+      ],
     );
   }
 }
