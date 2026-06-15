@@ -88,6 +88,8 @@ class _ViewerScreenState extends State<ViewerScreen> {
   }
 
   /// ドックを表示し、無操作タイマーを張り直す(一定時間後に自動で隠す)。
+  /// initState からも呼ぶが、_dockVisible の初期値が true のため setState は
+  /// 走らない(build 前 setState 違反を避けるための前提。初期値を変えないこと)。
   void _revealDock() {
     _dockTimer?.cancel();
     if (!_dockVisible) setState(() => _dockVisible = true);
@@ -207,11 +209,13 @@ class _ViewerScreenState extends State<ViewerScreen> {
                   onHorizontalDragEnd: (_) {
                     if (_dragDx <= -_swipeThreshold) {
                       c.next();
-                      _revealDock();
                     } else if (_dragDx >= _swipeThreshold) {
                       c.prev();
-                      _revealDock();
+                    } else {
+                      return;
                     }
+                    // 没入中(HUD 非表示)はドックを出さない=無駄な計時を避ける。
+                    if (!c.hudHidden) _revealDock();
                   },
                   child: Stack(
                     fit: StackFit.expand,

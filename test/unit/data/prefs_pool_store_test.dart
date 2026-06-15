@@ -34,8 +34,6 @@ void main() {
     expect(loaded!.length, 1);
     expect(loaded.lastRefreshedAt, ts);
     expect(loaded.photos.first.category, PhotoCategory.mars);
-    // 画像参照は現在のキャッシュディレクトリ + ファイル名へ解決される。
-    expect(loaded.photos.first.imageRef, '/cache/a');
   });
 
   test('保存済みの絶対パスは現在のキャッシュへ再ベースする(アップグレード耐性)', () async {

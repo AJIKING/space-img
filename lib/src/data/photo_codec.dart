@@ -5,9 +5,15 @@ import '../domain/photos/photo.dart';
 /// キャッシュ画像はファイル名(SHA-1)が安定キーなので、保存時の絶対パスでなく
 /// **現在の [cacheDir] + ファイル名**で解決する。iOS はアプリ更新/復元で
 /// コンテナの絶対パスが変わるため、絶対パスをそのまま信用すると参照切れになる。
-/// アセット参照(`assets/`)と空文字はそのまま返す。
+/// アセット参照(`assets/`)・空文字・URL や data URI など**ファイルパス以外**は
+/// そのまま返す(ローカルキャッシュのファイル参照だけを再ベースする)。
 String resolveCachedRef(String imageRef, String cacheDir) {
-  if (imageRef.isEmpty || imageRef.startsWith('assets/')) return imageRef;
+  if (imageRef.isEmpty ||
+      imageRef.startsWith('assets/') ||
+      imageRef.contains('://') ||
+      imageRef.startsWith('data:')) {
+    return imageRef;
+  }
   final base = imageRef.split(RegExp(r'[/\\]')).last;
   return '$cacheDir/$base';
 }
