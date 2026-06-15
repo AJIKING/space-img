@@ -29,8 +29,11 @@
 	     App Store Connect の暗号化に関する質問が毎回スキップされる。 -->
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
-	<!-- 「写真を保存」(gal)で使用。フォトライブラリへの追加のみ。 -->
+	<!-- 「写真を保存」(gal)で使用。追加用 + 一部 OS / プラグインが要求する
+	     一般用途文字列の両方を宣言しておく(処理段階での ITMS-90683 回避)。 -->
 	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>気に入った宇宙写真をフォトに保存します(壁紙設定に使えます)。</string>
+	<key>NSPhotoLibraryUsageDescription</key>
 	<string>気に入った宇宙写真をフォトに保存します(壁紙設定に使えます)。</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
