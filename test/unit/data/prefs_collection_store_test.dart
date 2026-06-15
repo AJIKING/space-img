@@ -9,11 +9,14 @@ void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
   test('未保存なら空リスト', () async {
-    expect(await PrefsCollectionStore().load(), isEmpty);
+    expect(
+      await PrefsCollectionStore(cacheDirPath: () async => '/cache').load(),
+      isEmpty,
+    );
   });
 
   test('お気に入りを往復で復元できる(順序保持)', () async {
-    final store = PrefsCollectionStore();
+    final store = PrefsCollectionStore(cacheDirPath: () async => '/cache');
     await store.save([
       samplePhoto('a'),
       samplePhoto('b', category: PhotoCategory.mars),
@@ -29,6 +32,9 @@ void main() {
     SharedPreferences.setMockInitialValues({
       PrefsCollectionStore.storageKey: 'not json',
     });
-    expect(await PrefsCollectionStore().load(), isEmpty);
+    expect(
+      await PrefsCollectionStore(cacheDirPath: () async => '/cache').load(),
+      isEmpty,
+    );
   });
 }

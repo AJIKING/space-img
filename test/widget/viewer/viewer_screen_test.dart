@@ -127,6 +127,31 @@ void main() {
     await dispose(tester);
   });
 
+  testWidgets('一定時間でドックが自動的に隠れ、写真情報は残る', (tester) async {
+    final pool = nebulaPool(['a']);
+    final viewer = ViewerController(pool: pool.pool, random: Random(0));
+    final collection = collectionOf();
+    await pumpScreen(
+      tester,
+      viewer: viewer,
+      pool: pool,
+      settings: settingsOf(),
+      collection: collection,
+    );
+
+    // 無操作で 4 秒経過 → ドックは自動非表示、HUD(写真情報)は残る。
+    await tester.pump(const Duration(seconds: 5));
+    expect(find.byKey(const Key('hud-meta')), findsOneWidget);
+    expect(viewer.hudHidden, isFalse);
+
+    // ドックは隠れているので SAVE 位置タップは保存でなく再表示に回る。
+    await tester.tap(find.byKey(const Key('dock-save')), warnIfMissed: false);
+    await tester.pump();
+    expect(collection.favorites, isEmpty);
+
+    await dispose(tester);
+  });
+
   testWidgets('空表示(写真なし)では再取得ボタンを出し、押すと補充する', (tester) async {
     final source = FakePhotoSource(candidates: [sampleRemote('x')]);
     final pool = poolWith(const <PhotoCategory, PhotoPool>{}, source: source);

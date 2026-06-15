@@ -10,11 +10,16 @@ void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
   test('未保存なら null', () async {
-    expect(await PrefsPoolStore().load(PhotoCategory.nebula), isNull);
+    expect(
+      await PrefsPoolStore(
+        cacheDirPath: () async => '/cache',
+      ).load(PhotoCategory.nebula),
+      isNull,
+    );
   });
 
   test('カテゴリ別に往復で復元できる', () async {
-    final store = PrefsPoolStore();
+    final store = PrefsPoolStore(cacheDirPath: () async => '/cache');
     final ts = DateTime.fromMillisecondsSinceEpoch(1700000000000);
     await store.save(
       PhotoCategory.mars,
@@ -29,10 +34,28 @@ void main() {
     expect(loaded!.length, 1);
     expect(loaded.lastRefreshedAt, ts);
     expect(loaded.photos.first.category, PhotoCategory.mars);
+    // 画像参照は現在のキャッシュディレクトリ + ファイル名へ解決される。
+    expect(loaded.photos.first.imageRef, '/cache/a');
+  });
+
+  test('保存済みの絶対パスは現在のキャッシュへ再ベースする(アップグレード耐性)', () async {
+    SharedPreferences.setMockInitialValues({
+      PrefsPoolStore.keyFor(PhotoCategory.nebula):
+          '{"photos":[{"id":"x","title":"t","center":"C","category":"nebula",'
+          '"imageRef":"/old/Containers/UUID/photo_pool/abc.img"}],'
+          '"lastRefreshedAt":null}',
+    });
+
+    final loaded = await PrefsPoolStore(
+      cacheDirPath: () async => '/new/dir',
+    ).load(PhotoCategory.nebula);
+
+    // 旧コンテナの絶対パスでも、ファイル名を現在のディレクトリに繋ぎ直す。
+    expect(loaded!.photos.single.imageRef, '/new/dir/abc.img');
   });
 
   test('別カテゴリは独立している', () async {
-    final store = PrefsPoolStore();
+    final store = PrefsPoolStore(cacheDirPath: () async => '/cache');
     await store.save(
       PhotoCategory.mars,
       PhotoPool(photos: [samplePhoto('a', category: PhotoCategory.mars)]),
@@ -46,7 +69,12 @@ void main() {
     SharedPreferences.setMockInitialValues({
       PrefsPoolStore.keyFor(PhotoCategory.nebula): 'not json',
     });
-    expect(await PrefsPoolStore().load(PhotoCategory.nebula), isNull);
+    expect(
+      await PrefsPoolStore(
+        cacheDirPath: () async => '/cache',
+      ).load(PhotoCategory.nebula),
+      isNull,
+    );
   });
 
   test('未知カテゴリの写真はスキップする', () async {
@@ -57,7 +85,9 @@ void main() {
           '"lastRefreshedAt":null}',
     });
 
-    final loaded = await PrefsPoolStore().load(PhotoCategory.nebula);
+    final loaded = await PrefsPoolStore(
+      cacheDirPath: () async => '/cache',
+    ).load(PhotoCategory.nebula);
 
     expect(loaded!.photos, isEmpty);
   });

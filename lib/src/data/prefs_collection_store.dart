@@ -9,7 +9,11 @@ import 'photo_codec.dart';
 /// [CollectionStore] の本番実装。お気に入りを shared_preferences に
 /// 単一 JSON 配列で保存する。**壊れた JSON は例外にせず空リスト**。
 class PrefsCollectionStore implements CollectionStore {
-  PrefsCollectionStore();
+  PrefsCollectionStore({required this.cacheDirPath});
+
+  /// 現在のキャッシュディレクトリ絶対パス(画像参照の再ベース用。iOS のコンテナ
+  /// パス変化対策)。本番は FileImageStore.directoryPath、テストは固定値。
+  final Future<String> Function() cacheDirPath;
 
   SharedPreferences? _prefs;
 
@@ -23,9 +27,17 @@ class PrefsCollectionStore implements CollectionStore {
     final raw = (await _instance).getString(storageKey);
     if (raw == null) return [];
     try {
+      final dir = await cacheDirPath();
       final list = jsonDecode(raw) as List;
       return list
-          .map((e) => photoFromJson(e as Map<String, dynamic>))
+          .map((e) => e as Map<String, dynamic>)
+          .map((m) {
+            final ref = m['imageRef'];
+            return ref is String
+                ? {...m, 'imageRef': resolveCachedRef(ref, dir)}
+                : m;
+          })
+          .map(photoFromJson)
           .whereType<Photo>()
           .toList();
     } catch (_) {

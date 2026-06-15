@@ -29,6 +29,10 @@ class FileImageStore implements ImageStore {
     return _dir = dir;
   }
 
+  /// キャッシュディレクトリの絶対パス。永続化した画像参照を、起動ごとに変わり
+  /// うる現在のパスへ再ベースするために使う(iOS のコンテナパス変化対策)。
+  Future<String> directoryPath() async => (await _cacheDir).path;
+
   String _fileName(String id) => '${sha1.convert(utf8.encode(id))}.img';
 
   @override

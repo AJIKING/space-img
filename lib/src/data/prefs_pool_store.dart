@@ -13,7 +13,11 @@ import 'photo_codec.dart';
 /// スキーマを変えるときは新しいキー接頭辞(`photo_pool_v2_` …)を切り、旧キーから
 /// 移行する(ADR 0001 の永続化方針)。**壊れた JSON は例外にせず null**。
 class PrefsPoolStore implements PoolStore {
-  PrefsPoolStore();
+  PrefsPoolStore({required this.cacheDirPath});
+
+  /// 現在のキャッシュディレクトリ絶対パスを返す(画像参照の再ベース用)。
+  /// 本番は FileImageStore.directoryPath、テストは固定値を渡す。
+  final Future<String> Function() cacheDirPath;
 
   SharedPreferences? _prefs;
 
@@ -31,9 +35,10 @@ class PrefsPoolStore implements PoolStore {
     final raw = (await _instance).getString(keyFor(category));
     if (raw == null) return null;
     try {
+      final dir = await cacheDirPath();
       final map = jsonDecode(raw) as Map<String, dynamic>;
       final photos = (map['photos'] as List)
-          .map((e) => photoFromJson(e as Map<String, dynamic>))
+          .map((e) => photoFromJson(_rebased(e as Map<String, dynamic>, dir)))
           .whereType<Photo>()
           .toList();
       final ts = map['lastRefreshedAt'] as int?;
@@ -56,5 +61,12 @@ class PrefsPoolStore implements PoolStore {
       'lastRefreshedAt': pool.lastRefreshedAt?.millisecondsSinceEpoch,
     };
     await (await _instance).setString(keyFor(category), jsonEncode(map));
+  }
+
+  /// JSON の imageRef を現在のキャッシュディレクトリへ再ベースした写し。
+  static Map<String, dynamic> _rebased(Map<String, dynamic> json, String dir) {
+    final ref = json['imageRef'];
+    if (ref is! String) return json;
+    return {...json, 'imageRef': resolveCachedRef(ref, dir)};
   }
 }

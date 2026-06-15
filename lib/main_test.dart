@@ -45,8 +45,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   const clock = SystemClock();
-  final poolStore = PrefsPoolStore();
   final imageStore = FileImageStore();
+  final poolStore = PrefsPoolStore(cacheDirPath: imageStore.directoryPath);
   final refresher = PoolRefresher(
     clock: clock,
     source: const _OfflinePhotoSource(),
@@ -57,7 +57,9 @@ Future<void> main() async {
 
   final settings = SettingsController(store: PrefsSettingsStore());
   await settings.load();
-  final collectionStore = PrefsCollectionStore();
+  final collectionStore = PrefsCollectionStore(
+    cacheDirPath: imageStore.directoryPath,
+  );
   final collection = CollectionController(store: collectionStore);
   await collection.load();
 

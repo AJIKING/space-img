@@ -53,6 +53,11 @@ class _ViewerScreenState extends State<ViewerScreen> {
   late PhotoCategory _appliedCategory;
   Timer? _ticker;
   Timer? _autoTimer;
+  Timer? _dockTimer;
+
+  /// ドック(下部ナビ)の可視状態。無操作が続くと自動的に隠れる。
+  bool _dockVisible = true;
+  static const Duration _dockIdle = Duration(seconds: 4);
 
   /// 横ドラッグの累積量(スワイプ判定用)。
   double _dragDx = 0;
@@ -68,6 +73,7 @@ class _ViewerScreenState extends State<ViewerScreen> {
     widget.settings.addListener(_onSettingsChanged);
     _applyAutoAdvance();
     _applyScreenWake();
+    _revealDock();
   }
 
   @override
@@ -75,9 +81,37 @@ class _ViewerScreenState extends State<ViewerScreen> {
     widget.settings.removeListener(_onSettingsChanged);
     _ticker?.cancel();
     _autoTimer?.cancel();
+    _dockTimer?.cancel();
     // 画面常時オンを解除する(この画面を離れたら通常に戻す)。
     widget.screenWake.setEnabled(false);
     super.dispose();
+  }
+
+  /// ドックを表示し、無操作タイマーを張り直す(一定時間後に自動で隠す)。
+  void _revealDock() {
+    _dockTimer?.cancel();
+    if (!_dockVisible) setState(() => _dockVisible = true);
+    _dockTimer = Timer(_dockIdle, () {
+      if (mounted) setState(() => _dockVisible = false);
+    });
+  }
+
+  /// 画面タップ。状況に応じて HUD トグル / ドック復帰を出し分ける。
+  void _onTap() {
+    final c = widget.controller;
+    if (c.hudHidden) {
+      // 全部隠れている → 全部表示 + ドックの計時開始。
+      c.toggleHud();
+      _revealDock();
+    } else if (!_dockVisible) {
+      // 時計/情報は出ているがドックだけ自動で隠れた → ドックだけ戻す。
+      _revealDock();
+    } else {
+      // 全部表示中 → 没入(全部隠す)。
+      _dockTimer?.cancel();
+      setState(() => _dockVisible = false);
+      c.toggleHud();
+    }
   }
 
   void _onSettingsChanged() {
@@ -159,20 +193,24 @@ class _ViewerScreenState extends State<ViewerScreen> {
           builder: (context, _) {
             final photo = c.current;
             final s = widget.settings.settings;
+            // ドックは「HUD 表示中」かつ「無操作で自動非表示になっていない」とき表示。
+            final dockShown = !c.hudHidden && _dockVisible;
             return Stack(
               fit: StackFit.expand,
               children: [
                 GestureDetector(
                   key: const Key('viewer-gesture'),
                   behavior: HitTestBehavior.opaque,
-                  onTap: c.toggleHud,
+                  onTap: _onTap,
                   onHorizontalDragStart: (_) => _dragDx = 0,
                   onHorizontalDragUpdate: (d) => _dragDx += d.delta.dx,
                   onHorizontalDragEnd: (_) {
                     if (_dragDx <= -_swipeThreshold) {
                       c.next();
+                      _revealDock();
                     } else if (_dragDx >= _swipeThreshold) {
                       c.prev();
+                      _revealDock();
                     }
                   },
                   child: Stack(
@@ -201,10 +239,10 @@ class _ViewerScreenState extends State<ViewerScreen> {
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: IgnorePointer(
-                    ignoring: c.hudHidden,
+                    ignoring: !dockShown,
                     child: AnimatedOpacity(
                       duration: const Duration(milliseconds: 450),
-                      opacity: c.hudHidden ? 0 : 1,
+                      opacity: dockShown ? 1 : 0,
                       child: SafeArea(
                         child: Dock(
                           isSaved:
