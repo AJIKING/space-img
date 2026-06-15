@@ -31,23 +31,6 @@ class HudOverlay extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // ステータスバー
-        Positioned(
-          top: 18,
-          left: 22,
-          right: 22,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                settings.use24h ? clock : '$clock ${meridiem(now)}',
-                style: _mono(12, weight: FontWeight.w700),
-              ),
-              Text('ORBIT', style: _mono(12, weight: FontWeight.w700)),
-            ],
-          ),
-        ),
-
         // レチクル(中央照準 + 四隅のコーナーブラケット)。既定では非表示。
         if (settings.showReticle) ...[
           const _Bracket(top: 70, left: 18),

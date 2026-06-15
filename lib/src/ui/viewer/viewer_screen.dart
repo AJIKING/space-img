@@ -183,42 +183,54 @@ class _ViewerScreenState extends State<ViewerScreen> {
                     ],
                   ),
                 ),
+                // ドックは HUD と一緒に表示 / 非表示する(タップで両方トグル)。
+                // 非表示中はポインタを通すので、ドック位置のタップで再表示できる。
                 Align(
                   alignment: Alignment.bottomCenter,
-                  child: SafeArea(
-                    child: Dock(
-                      isSaved:
-                          photo != null && widget.collection.isFavorite(photo),
-                      onSave: () {
-                        if (photo == null) return;
-                        final wasSaved = widget.collection.isFavorite(photo);
-                        widget.collection.toggle(photo);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              wasSaved ? 'コレクションから外しました' : 'コレクションに保存しました',
-                            ),
-                            duration: const Duration(seconds: 1),
-                          ),
-                        );
-                      },
-                      onCollection: () => showCollectionSheet(
-                        context,
-                        widget.collection,
-                        widget.controller.showPhoto,
-                      ),
-                      onWallpaper: () {
-                        if (photo != null) {
-                          showWallpaperPreview(
+                  child: IgnorePointer(
+                    ignoring: c.hudHidden,
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 450),
+                      opacity: c.hudHidden ? 0 : 1,
+                      child: SafeArea(
+                        child: Dock(
+                          isSaved:
+                              photo != null &&
+                              widget.collection.isFavorite(photo),
+                          onSave: () {
+                            if (photo == null) return;
+                            final wasSaved = widget.collection.isFavorite(
+                              photo,
+                            );
+                            widget.collection.toggle(photo);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  wasSaved ? 'コレクションから外しました' : 'コレクションに保存しました',
+                                ),
+                                duration: const Duration(seconds: 1),
+                              ),
+                            );
+                          },
+                          onCollection: () => showCollectionSheet(
                             context,
-                            photo,
-                            widget.clock.now(),
-                            widget.wallpaper,
-                          );
-                        }
-                      },
-                      onCustomize: () =>
-                          showCustomizeSheet(context, widget.settings),
+                            widget.collection,
+                            widget.controller.showPhoto,
+                          ),
+                          onWallpaper: () {
+                            if (photo != null) {
+                              showWallpaperPreview(
+                                context,
+                                photo,
+                                widget.clock.now(),
+                                widget.wallpaper,
+                              );
+                            }
+                          },
+                          onCustomize: () =>
+                              showCustomizeSheet(context, widget.settings),
+                        ),
+                      ),
                     ),
                   ),
                 ),

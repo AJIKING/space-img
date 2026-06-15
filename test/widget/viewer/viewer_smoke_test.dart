@@ -63,7 +63,6 @@ void main() {
       ),
     );
 
-    expect(find.text('ORBIT'), findsOneWidget);
     expect(find.text('カリーナ星雲'), findsOneWidget);
     expect(find.text('NASA · STScI'), findsOneWidget);
 

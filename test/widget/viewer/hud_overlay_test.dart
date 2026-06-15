@@ -31,10 +31,9 @@ void main() {
     await pumpHud(tester, settings: const ViewerSettings());
 
     expect(find.byKey(const Key('hud-clock')), findsOneWidget);
-    expect(find.text('09:05'), findsWidgets);
+    expect(find.text('09:05'), findsOneWidget);
     expect(find.byKey(const Key('hud-meta')), findsOneWidget);
     expect(find.byKey(const Key('hud-progress')), findsOneWidget);
-    expect(find.text('ORBIT'), findsOneWidget);
     // 観測機器の装飾は既定で非表示。
     expect(find.byKey(const Key('hud-telemetry-left')), findsNothing);
     expect(find.byKey(const Key('hud-reticle')), findsNothing);

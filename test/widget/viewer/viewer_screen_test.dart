@@ -95,8 +95,33 @@ void main() {
       collection: collectionOf(),
     );
 
-    expect(find.text('ORBIT'), findsOneWidget);
     expect(find.text(viewer.current!.title), findsOneWidget);
+
+    await dispose(tester);
+  });
+
+  testWidgets('タップで HUD とドックが一緒に隠れ、ドック位置タップで再表示', (tester) async {
+    final pool = nebulaPool(['a']);
+    final viewer = ViewerController(pool: pool.pool, random: Random(0));
+    final collection = collectionOf();
+    await pumpScreen(
+      tester,
+      viewer: viewer,
+      pool: pool,
+      settings: settingsOf(),
+      collection: collection,
+    );
+
+    // タップで HUD / ドックを隠す。
+    await tester.tap(find.byKey(const Key('viewer-gesture')));
+    await tester.pump();
+    expect(viewer.hudHidden, isTrue);
+
+    // 非表示中はドックの SAVE は効かず、タップで再表示される。
+    await tester.tap(find.byKey(const Key('dock-save')), warnIfMissed: false);
+    await tester.pump();
+    expect(collection.favorites, isEmpty);
+    expect(viewer.hudHidden, isFalse);
 
     await dispose(tester);
   });
