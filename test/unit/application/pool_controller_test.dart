@@ -134,6 +134,27 @@ void main() {
     expect(imageStore.data.containsKey('orphan'), isFalse);
   });
 
+  test('refresh: 24h 以内なら isRefreshing を立てず取得もしない(ちらつき防止)', () async {
+    final source = FakePhotoSource(candidates: [sampleRemote('a')]);
+    final controller = build(
+      source: source,
+      seedPools: {
+        PhotoCategory.nebula: PhotoPool(
+          photos: [samplePhoto('seed')],
+          lastRefreshedAt: now, // FakeClock(now) と同時刻 = 補充不要
+        ),
+      },
+    );
+    final refreshingStates = <bool>[];
+    controller.addListener(() => refreshingStates.add(controller.isRefreshing));
+
+    await controller.refresh();
+
+    expect(controller.lastStatus, RefreshStatus.skippedFresh);
+    expect(source.fetchCount, 0);
+    expect(refreshingStates.contains(true), isFalse);
+  });
+
   test('refresh: 失敗してもプールは保持する', () async {
     final controller = build(
       source: FakePhotoSource(throwOnFetch: true),

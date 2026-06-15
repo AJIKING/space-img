@@ -78,6 +78,13 @@ class PoolRefresher {
   /// 関連度順の先頭だけに偏らせない(似た写真ばかりになるのを避ける)。
   final int candidatePoolSize;
 
+  /// 補充間隔の判定だけを行う(UI が「いま補充するか」を事前に知り、無駄な
+  /// 進捗表示のちらつきを避けるため)。[refreshIfNeeded] 内部の判定と同じ。
+  bool shouldRefresh(PhotoPool current) => policy.shouldRefresh(
+    now: clock.now(),
+    lastRefreshedAt: current.lastRefreshedAt,
+  );
+
   /// 必要なら補充する。補充不要・失敗時は [current] をそのまま返す。
   Future<PoolRefreshResult> refreshIfNeeded(
     PhotoPool current,

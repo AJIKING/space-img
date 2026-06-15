@@ -70,11 +70,21 @@ class PoolController extends ChangeNotifier {
   }
 
   Future<void> _doRefresh() async {
+    // 開始時点のカテゴリとプールを固定する(以降の setCategory 割り込みで
+    // target と現プールが食い違わないように)。
     final target = _category;
+    final current = pool;
+
+    // 補充不要なら進捗(isRefreshing)を立てずに即終了する(チップのちらつき防止)。
+    if (!refresher.shouldRefresh(current)) {
+      _lastStatus = RefreshStatus.skippedFresh;
+      return;
+    }
+
     _isRefreshing = true;
     notifyListeners();
 
-    final result = await refresher.refreshIfNeeded(pool, target);
+    final result = await refresher.refreshIfNeeded(current, target);
 
     _pools[target] = result.pool;
     _lastStatus = result.status;

@@ -127,6 +127,8 @@ void main() {
     await dispose(tester);
   });
 
+  // 注意: 取得中インジケータ(無限スピナー)表示中に pumpAndSettle は使わない
+  // (settle せずハングする)。補充中は pump(Duration) で進めること。
   testWidgets('補充中は取得中インジケータを表示する', (tester) async {
     final gate = Completer<void>();
     final source = FakePhotoSource(
