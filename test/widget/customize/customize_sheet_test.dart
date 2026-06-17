@@ -6,14 +6,13 @@ import 'package:orbit/src/domain/settings/viewer_settings.dart';
 import 'package:orbit/src/ui/customize/customize_sheet.dart';
 
 import '../../fixtures/in_memory_settings_store.dart';
+import '../../fixtures/localized_app.dart';
 
 void main() {
   Future<SettingsController> pumpSheet(WidgetTester tester) async {
     final controller = SettingsController(store: InMemorySettingsStore());
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(body: CustomizeSheet(controller: controller)),
-      ),
+      localizedApp(Scaffold(body: CustomizeSheet(controller: controller))),
     );
     return controller;
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../domain/photos/photo.dart';
 import '../../domain/platform/wallpaper_service.dart';
 import '../format.dart';
@@ -24,16 +25,17 @@ class WallpaperPreview extends StatelessWidget {
   final WallpaperService service;
 
   Future<void> _save(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     String message;
     try {
       await service.saveToGallery(photo);
       message = service.supportsDirectSet
-          ? '写真を保存しました'
-          : '写真を保存しました。設定 → 壁紙 から設定できます';
+          ? l10n.saveSuccess
+          : l10n.saveSuccessIos;
     } catch (_) {
-      message = '保存に失敗しました';
+      message = l10n.saveFailed;
     }
     navigator.maybePop();
     messenger.showSnackBar(
@@ -42,14 +44,15 @@ class WallpaperPreview extends StatelessWidget {
   }
 
   Future<void> _setWallpaper(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     String message;
     try {
       await service.setAsWallpaper(photo);
-      message = '壁紙に設定しました';
+      message = l10n.wallpaperSetSuccess;
     } catch (_) {
-      message = '壁紙の設定に失敗しました';
+      message = l10n.wallpaperSetFailed;
     }
     navigator.maybePop();
     messenger.showSnackBar(
@@ -59,6 +62,7 @@ class WallpaperPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -80,7 +84,7 @@ class WallpaperPreview extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                formatDate(now).toUpperCase(),
+                l10n.hudDate(now).toUpperCase(),
                 style: OrbitText.display.copyWith(
                   fontSize: 14,
                   color: Colors.white,
@@ -110,9 +114,8 @@ class WallpaperPreview extends StatelessWidget {
                 children: [
                   Text(
                     service.supportsDirectSet
-                        ? '壁紙に設定するか、写真として保存できます。'
-                        : 'iOS ではアプリから壁紙を設定できません。\n'
-                              '写真を保存して、設定 → 壁紙 から適用してください。',
+                        ? l10n.wallpaperHintAndroid
+                        : l10n.wallpaperHintIos,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: Colors.white70,
@@ -131,7 +134,7 @@ class WallpaperPreview extends StatelessWidget {
                           foregroundColor: const Color(0xFF0A0E1A),
                         ),
                         onPressed: () => _setWallpaper(context),
-                        child: const Text('壁紙に設定する'),
+                        child: Text(l10n.wallpaperSetButton),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -140,9 +143,9 @@ class WallpaperPreview extends StatelessWidget {
                       child: OutlinedButton(
                         key: const Key('wallpaper-save'),
                         onPressed: () => _save(context),
-                        child: const Text(
-                          '写真を保存',
-                          style: TextStyle(color: OrbitColors.hud),
+                        child: Text(
+                          l10n.savePhotoButton,
+                          style: const TextStyle(color: OrbitColors.hud),
                         ),
                       ),
                     ),
@@ -156,7 +159,7 @@ class WallpaperPreview extends StatelessWidget {
                           foregroundColor: const Color(0xFF0A0E1A),
                         ),
                         onPressed: () => _save(context),
-                        child: const Text('写真を保存'),
+                        child: Text(l10n.savePhotoButton),
                       ),
                     ),
                   const SizedBox(height: 8),
@@ -165,9 +168,9 @@ class WallpaperPreview extends StatelessWidget {
                     child: TextButton(
                       key: const Key('wallpaper-close'),
                       onPressed: () => Navigator.of(context).maybePop(),
-                      child: const Text(
-                        '閉じる',
-                        style: TextStyle(color: OrbitColors.hud),
+                      child: Text(
+                        l10n.close,
+                        style: const TextStyle(color: OrbitColors.hud),
                       ),
                     ),
                   ),

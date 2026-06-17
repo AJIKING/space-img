@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import 'application/collection_controller.dart';
 import 'application/pool_controller.dart';
 import 'application/settings_controller.dart';
@@ -36,6 +37,9 @@ class OrbitApp extends StatelessWidget {
     return MaterialApp(
       title: 'Apogee',
       debugShowCheckedModeBanner: false,
+      // 端末のロケールに追従(日本語 / 英語 / 簡体字)。未対応ロケールは英語へ。
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: buildOrbitTheme(),
       home: ViewerScreen(
         controller: viewer,

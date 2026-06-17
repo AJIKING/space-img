@@ -1,0 +1,68 @@
+{
+  "@@locale": "ja",
+
+  "tuneTitle": "カスタマイズ",
+  "sectionTheme": "観測テーマ",
+  "sectionClock": "時計",
+  "sectionHud": "HUD(観測機器の表示)",
+  "sectionAmbient": "アンビエント",
+
+  "clockShow": "時計を表示",
+  "clockPositionLabel": "位置",
+  "positionTop": "上",
+  "positionCenter": "中央",
+  "positionBottom": "下",
+  "clockSizeLabel": "サイズ",
+  "clock24h": "24時間表示",
+
+  "hudTelemetry": "座標テレメトリ",
+  "hudReticle": "レチクル(照準)",
+  "hudMeta": "写真情報",
+
+  "autoAdvance": "自動スライド",
+  "interval": "切替の間隔",
+  "keepAwake": "画面を常時オン",
+  "keepAwakeSub": "KEEP AWAKE — 眺める待ち受け",
+
+  "collectionTitle": "コレクション",
+  "collectionEmpty": "保存した宇宙はまだありません。\n気に入った写真で ♡ SAVE を押すと\nここに記録されます。",
+
+  "savedToCollection": "コレクションに保存しました",
+  "removedFromCollection": "コレクションから外しました",
+
+  "loading": "取得中…",
+  "loadingSpace": "宇宙を取得中…",
+  "emptyTitle": "まだ写真がありません",
+  "emptyHint": "通信環境を確認して再取得してください",
+  "retry": "再取得",
+
+  "saveSuccess": "写真を保存しました",
+  "saveSuccessIos": "写真を保存しました。設定 → 壁紙 から設定できます",
+  "saveFailed": "保存に失敗しました",
+  "wallpaperSetSuccess": "壁紙に設定しました",
+  "wallpaperSetFailed": "壁紙の設定に失敗しました",
+  "wallpaperHintAndroid": "壁紙に設定するか、写真として保存できます。",
+  "wallpaperHintIos": "iOS ではアプリから壁紙を設定できません。\n写真を保存して、設定 → 壁紙 から適用してください。",
+  "wallpaperSetButton": "壁紙に設定する",
+  "savePhotoButton": "写真を保存",
+  "close": "閉じる",
+
+  "semSave": "お気に入りに追加",
+  "semCollection": "コレクションを開く",
+  "semWallpaper": "待ち受けプレビュー",
+  "semTune": "カスタマイズ",
+
+  "semCurrentTime": "現在時刻 {clock}",
+  "hudDate": "{date}",
+
+  "categoryNebula": "星雲",
+  "categoryGalaxy": "銀河",
+  "categoryEarth": "地球",
+  "categoryMars": "火星",
+  "categoryMoon": "月",
+  "categoryJupiter": "木星",
+  "categorySun": "太陽",
+  "categoryDeepField": "深宇宙",
+  "categoryAurora": "オーロラ",
+  "categorySaturn": "土星"
+}

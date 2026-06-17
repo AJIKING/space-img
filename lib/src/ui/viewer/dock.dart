@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../theme/orbit_theme.dart';
 
 /// ビューア下部のドック(SAVE / SAVED / WALLPAPER / TUNE)。
@@ -24,6 +25,7 @@ class Dock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 22, left: 8, right: 8),
       child: Row(
@@ -33,7 +35,7 @@ class Dock extends StatelessWidget {
               buttonKey: const Key('dock-save'),
               icon: isSaved ? Icons.favorite : Icons.favorite_border,
               label: 'SAVE',
-              semanticLabel: 'お気に入りに追加',
+              semanticLabel: l10n.semSave,
               active: isSaved,
               onTap: onSave,
             ),
@@ -43,7 +45,7 @@ class Dock extends StatelessWidget {
               buttonKey: const Key('dock-saved'),
               icon: Icons.grid_view_rounded,
               label: 'SAVED',
-              semanticLabel: 'コレクションを開く',
+              semanticLabel: l10n.semCollection,
               onTap: onCollection,
             ),
           ),
@@ -52,7 +54,7 @@ class Dock extends StatelessWidget {
               buttonKey: const Key('dock-wallpaper'),
               icon: Icons.smartphone,
               label: 'WALLPAPER',
-              semanticLabel: '待ち受けプレビュー',
+              semanticLabel: l10n.semWallpaper,
               onTap: onWallpaper,
             ),
           ),
@@ -61,7 +63,7 @@ class Dock extends StatelessWidget {
               buttonKey: const Key('dock-tune'),
               icon: Icons.tune,
               label: 'TUNE',
-              semanticLabel: 'カスタマイズ',
+              semanticLabel: l10n.semTune,
               onTap: onCustomize,
             ),
           ),

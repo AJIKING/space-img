@@ -21,6 +21,7 @@ import '../../fixtures/in_memory_collection_store.dart';
 import '../../fixtures/in_memory_image_store.dart';
 import '../../fixtures/in_memory_pool_store.dart';
 import '../../fixtures/in_memory_settings_store.dart';
+import '../../fixtures/localized_app.dart';
 import '../../fixtures/sample_photos.dart';
 
 void main() {
@@ -64,8 +65,8 @@ void main() {
     FakeScreenWake? screenWake,
   }) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: ViewerScreen(
+      localizedApp(
+        ViewerScreen(
           controller: viewer,
           pool: pool,
           settings: settings,

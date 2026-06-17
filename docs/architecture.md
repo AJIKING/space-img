@@ -77,6 +77,8 @@ lib/
 ├── main.dart                 # 本番 composition root
 ├── main_dev.dart             # 開発用 composition root
 ├── main_test.dart            # integration test 用 composition root
+├── l10n/                     # 多言語(gen-l10n)。app_{en,ja,zh}.arb が原本、
+│                             # app_localizations*.dart は生成物(flutter gen-l10n)
 └── src/
     ├── app.dart              # MaterialApp・テーマ適用・ビューア起動
     ├── core/
@@ -134,6 +136,14 @@ lib/
 ```
 
 ファイル名は実装時の目安。1 ファイルが肥大したら同じフォルダ内で分割してよいが、**フォルダの責務と依存方向は変えない**。
+
+## 多言語対応(i18n)
+
+- 対応ロケール: 日本語 / 英語 / 簡体字中国語。**端末のロケールに追従**し、アプリ内に言語切替 UI は持たない(`SettingsStore` にも保存しない)。未対応ロケールは `supportedLocales` 先頭の英語へフォールバックする。
+- ユーザー向け文字列は `lib/l10n/app_*.arb` に集約し、`flutter gen-l10n`(`l10n.yaml`)で `AppLocalizations` を生成する。`pubspec.yaml` の `generate: true` により `flutter pub get` 時に自動再生成される。
+- ロケール依存の日付表記は `AppLocalizations.hudDate`(`intl` の `DateFormat`)に委ねる。`lib/src/ui/format.dart` にはロケール非依存の整形(時刻 `HH:mm` / フレーム番号)だけを置く。
+- 観測テーマの英字コード(`NEBULA` 等)は言語非依存のコールサイン表記として `category_labels.dart` の定数に残し、表示名だけ `categoryName(l10n, category)` でロケール解決する。
+- テストはロケールを固定して表示文字列を決定的にする(`test/fixtures/localized_app.dart` は既定で `ja` 固定)。
 
 ## テストのミラー構成
 

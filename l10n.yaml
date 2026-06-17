@@ -1,0 +1,9 @@
+# gen-l10n の設定。ARB から AppLocalizations を lib/l10n/ に生成する。
+# 端末ロケールに追従(MaterialApp の supportedLocales / delegates で解決)。
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+output-dir: lib/l10n
+# AppLocalizations.of(context) を non-null で返す(! 不要)。
+nullable-getter: false

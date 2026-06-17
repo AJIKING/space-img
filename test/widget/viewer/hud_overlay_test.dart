@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:orbit/src/domain/settings/viewer_settings.dart';
 import 'package:orbit/src/ui/viewer/hud_overlay.dart';
 
+import '../../fixtures/localized_app.dart';
 import '../../fixtures/sample_photos.dart';
 
 void main() {
@@ -13,8 +14,8 @@ void main() {
     required ViewerSettings settings,
   }) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
+      localizedApp(
+        Scaffold(
           body: HudOverlay(
             photo: samplePhoto('a'),
             index: 0,

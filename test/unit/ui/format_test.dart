@@ -18,10 +18,8 @@ void main() {
     expect(meridiem(DateTime(2026, 6, 14, 12)), 'PM');
   });
 
-  test('formatDate: M月D日 (曜)。日曜の境界も正しい', () {
-    expect(formatDate(DateTime(2026, 1, 1)), '1月1日 (木)');
-    expect(formatDate(DateTime(2026, 1, 4)), '1月4日 (日)');
-  });
+  // 日付のロケール依存表記は AppLocalizations.hudDate に移したため、ここでは
+  // 検証しない(localizations_test.dart でロケール別に検証する)。
 
   test('formatFrame: 3 桁ゼロ詰め', () {
     expect(formatFrame(1), '001');

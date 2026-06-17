@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../application/collection_controller.dart';
 import '../../domain/photos/photo.dart';
 import '../theme/orbit_theme.dart';
@@ -22,6 +23,7 @@ class CollectionSheet extends StatelessWidget {
       listenable: controller,
       builder: (context, _) {
         final favorites = controller.favorites;
+        final l10n = AppLocalizations.of(context);
         return SafeArea(
           top: false,
           child: ConstrainedBox(
@@ -38,15 +40,15 @@ class CollectionSheet extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _header(context),
+                  _header(context, l10n),
                   if (favorites.isEmpty)
-                    const Padding(
-                      key: Key('collection-empty'),
-                      padding: EdgeInsets.fromLTRB(22, 30, 22, 40),
+                    Padding(
+                      key: const Key('collection-empty'),
+                      padding: const EdgeInsets.fromLTRB(22, 30, 22, 40),
                       child: Text(
-                        '保存した宇宙はまだありません。\n気に入った写真で ♡ SAVE を押すと\nここに記録されます。',
+                        l10n.collectionEmpty,
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: OrbitColors.muted,
                           fontSize: 12,
                           height: 1.8,
@@ -90,7 +92,7 @@ class CollectionSheet extends StatelessWidget {
     );
   }
 
-  Widget _header(BuildContext context) => Padding(
+  Widget _header(BuildContext context, AppLocalizations l10n) => Padding(
     padding: const EdgeInsets.fromLTRB(22, 14, 12, 8),
     child: Row(
       children: [
@@ -105,9 +107,9 @@ class CollectionSheet extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        const Text(
-          'コレクション',
-          style: TextStyle(
+        Text(
+          l10n.collectionTitle,
+          style: const TextStyle(
             color: OrbitColors.hud,
             fontSize: 16,
             fontWeight: FontWeight.w600,

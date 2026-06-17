@@ -10,6 +10,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # 多言語対応(日本語 / 英語 / 簡体字中国語)。端末のロケールに追従する。
+  flutter_localizations:
+    sdk: flutter
+  # ロケール依存の日付フォーマット(gen-l10n の DateTime プレースホルダが利用)
+  intl: any
 
   cupertino_icons: ^1.0.8
   # NASA Images API からの写真メタ取得(補充タイミングのみ。PhotoSource 境界の裏)
@@ -52,6 +57,8 @@ flutter_launcher_icons:
 
 flutter:
   uses-material-design: true
+  # ARB(lib/l10n/app_*.arb)から AppLocalizations を生成する(l10n.yaml 参照)。
+  generate: true
 
   # 初回起動・オフライン用の同梱シード画像(ADR 0004)。
   # 現状はプレースホルダ。詳細・差し替え手順は assets/seed/NOTICE.md。

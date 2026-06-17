@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../domain/photos/photo.dart';
 import '../../domain/settings/viewer_settings.dart';
 import '../format.dart';
@@ -27,6 +28,7 @@ class HudOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final clock = formatClock(now, use24h: settings.use24h);
     return Stack(
       fit: StackFit.expand,
@@ -67,7 +69,7 @@ class HudOverlay extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Semantics(
-                  label: '現在時刻 $clock',
+                  label: l10n.semCurrentTime(clock),
                   child: Text(
                     clock,
                     style: _mono(
@@ -78,7 +80,7 @@ class HudOverlay extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  formatDate(now).toUpperCase(),
+                  l10n.hudDate(now).toUpperCase(),
                   style: _display(13, color: OrbitColors.hud),
                 ),
               ],

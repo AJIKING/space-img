@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:orbit/src/ui/viewer/dock.dart';
 
+import '../../fixtures/localized_app.dart';
+
 void main() {
   testWidgets('各ボタンのタップが対応する callback を呼ぶ', (tester) async {
     final tapped = <String>[];
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
+      localizedApp(
+        Scaffold(
           body: Dock(
             onSave: () => tapped.add('save'),
             onCollection: () => tapped.add('collection'),
@@ -28,8 +30,8 @@ void main() {
 
   testWidgets('4 つのラベルが出る', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
+      localizedApp(
+        Scaffold(
           body: Dock(
             onSave: () {},
             onCollection: () {},

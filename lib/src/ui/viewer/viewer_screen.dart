@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../application/collection_controller.dart';
 import '../../application/pool_controller.dart';
 import '../../application/settings_controller.dart';
@@ -258,10 +259,13 @@ class _ViewerScreenState extends State<ViewerScreen> {
                               photo,
                             );
                             widget.collection.toggle(photo);
+                            final l10n = AppLocalizations.of(context);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  wasSaved ? 'コレクションから外しました' : 'コレクションに保存しました',
+                                  wasSaved
+                                      ? l10n.removedFromCollection
+                                      : l10n.savedToCollection,
                                 ),
                                 duration: const Duration(seconds: 1),
                               ),
@@ -319,6 +323,7 @@ class _LoadingChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       key: const Key('loading-indicator'),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -340,7 +345,7 @@ class _LoadingChip extends StatelessWidget {
           ),
           const SizedBox(width: 9),
           Text(
-            '取得中…',
+            l10n.loading,
             style: OrbitText.mono.copyWith(
               fontSize: 11,
               color: OrbitColors.muted,
@@ -361,6 +366,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (refreshing) {
       return Column(
         mainAxisSize: MainAxisSize.min,
@@ -375,7 +381,7 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            '宇宙を取得中…',
+            l10n.loadingSpace,
             style: OrbitText.mono.copyWith(
               fontSize: 13,
               color: OrbitColors.hud,
@@ -391,7 +397,7 @@ class _EmptyState extends StatelessWidget {
         const Icon(Icons.cloud_off, color: OrbitColors.muted, size: 42),
         const SizedBox(height: 14),
         Text(
-          'まだ写真がありません',
+          l10n.emptyTitle,
           style: OrbitText.display.copyWith(
             fontSize: 16,
             color: OrbitColors.hud,
@@ -399,7 +405,7 @@ class _EmptyState extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         Text(
-          '通信環境を確認して再取得してください',
+          l10n.emptyHint,
           style: OrbitText.mono.copyWith(
             fontSize: 11,
             color: OrbitColors.muted,
@@ -409,7 +415,10 @@ class _EmptyState extends StatelessWidget {
         OutlinedButton(
           key: const Key('empty-retry'),
           onPressed: onRetry,
-          child: const Text('再取得', style: TextStyle(color: OrbitColors.hud)),
+          child: Text(
+            l10n.retry,
+            style: const TextStyle(color: OrbitColors.hud),
+          ),
         ),
       ],
     );

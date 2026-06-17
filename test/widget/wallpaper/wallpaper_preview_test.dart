@@ -3,13 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:orbit/src/ui/wallpaper/wallpaper_preview.dart';
 
 import '../../fixtures/fake_wallpaper_service.dart';
+import '../../fixtures/localized_app.dart';
 import '../../fixtures/sample_photos.dart';
 
 void main() {
   Future<void> pump(WidgetTester tester, FakeWallpaperService service) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
+      localizedApp(
+        Scaffold(
           body: WallpaperPreview(
             photo: samplePhoto('a'),
             now: DateTime(2026, 6, 15, 9, 5),

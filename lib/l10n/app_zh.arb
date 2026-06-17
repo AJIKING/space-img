@@ -1,0 +1,68 @@
+{
+  "@@locale": "zh",
+
+  "tuneTitle": "自定义",
+  "sectionTheme": "观测主题",
+  "sectionClock": "时钟",
+  "sectionHud": "HUD(观测仪表)",
+  "sectionAmbient": "氛围",
+
+  "clockShow": "显示时钟",
+  "clockPositionLabel": "位置",
+  "positionTop": "上",
+  "positionCenter": "居中",
+  "positionBottom": "下",
+  "clockSizeLabel": "大小",
+  "clock24h": "24小时制",
+
+  "hudTelemetry": "坐标遥测",
+  "hudReticle": "准星",
+  "hudMeta": "照片信息",
+
+  "autoAdvance": "自动切换",
+  "interval": "切换间隔",
+  "keepAwake": "屏幕常亮",
+  "keepAwakeSub": "KEEP AWAKE — 凝望壁纸",
+
+  "collectionTitle": "收藏",
+  "collectionEmpty": "还没有保存的宇宙。\n在喜欢的照片上点击 ♡ SAVE\n即可记录在这里。",
+
+  "savedToCollection": "已保存到收藏",
+  "removedFromCollection": "已从收藏移除",
+
+  "loading": "加载中…",
+  "loadingSpace": "正在加载宇宙…",
+  "emptyTitle": "还没有照片",
+  "emptyHint": "请检查网络后重新获取",
+  "retry": "重新获取",
+
+  "saveSuccess": "照片已保存",
+  "saveSuccessIos": "照片已保存。可在 设置 → 壁纸 中设为壁纸",
+  "saveFailed": "保存失败",
+  "wallpaperSetSuccess": "已设为壁纸",
+  "wallpaperSetFailed": "设置壁纸失败",
+  "wallpaperHintAndroid": "可设为壁纸，或保存为照片。",
+  "wallpaperHintIos": "iOS 无法从应用内设置壁纸。\n请保存照片后，从 设置 → 壁纸 应用。",
+  "wallpaperSetButton": "设为壁纸",
+  "savePhotoButton": "保存照片",
+  "close": "关闭",
+
+  "semSave": "添加到收藏",
+  "semCollection": "打开收藏",
+  "semWallpaper": "壁纸预览",
+  "semTune": "自定义",
+
+  "semCurrentTime": "当前时间 {clock}",
+  "hudDate": "{date}",
+
+  "categoryNebula": "星云",
+  "categoryGalaxy": "星系",
+  "categoryEarth": "地球",
+  "categoryMars": "火星",
+  "categoryMoon": "月球",
+  "categoryJupiter": "木星",
+  "categorySun": "太阳",
+  "categoryDeepField": "深空",
+  "categoryAurora": "极光",
+  "categorySaturn": "土星"
+}

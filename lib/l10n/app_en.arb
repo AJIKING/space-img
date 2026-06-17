@@ -1,0 +1,79 @@
+{
+  "@@locale": "en",
+
+  "tuneTitle": "Customize",
+  "sectionTheme": "Observation Theme",
+  "sectionClock": "Clock",
+  "sectionHud": "HUD (Instruments)",
+  "sectionAmbient": "Ambient",
+
+  "clockShow": "Show clock",
+  "clockPositionLabel": "Position",
+  "positionTop": "Top",
+  "positionCenter": "Center",
+  "positionBottom": "Bottom",
+  "clockSizeLabel": "Size",
+  "clock24h": "24-hour format",
+
+  "hudTelemetry": "Coordinate telemetry",
+  "hudReticle": "Reticle",
+  "hudMeta": "Photo info",
+
+  "autoAdvance": "Auto advance",
+  "interval": "Interval",
+  "keepAwake": "Keep screen on",
+  "keepAwakeSub": "KEEP AWAKE — ambient wallpaper",
+
+  "collectionTitle": "Collection",
+  "collectionEmpty": "Nothing saved yet.\nTap ♡ SAVE on a photo you like\nto record it here.",
+
+  "savedToCollection": "Added to collection",
+  "removedFromCollection": "Removed from collection",
+
+  "loading": "Loading…",
+  "loadingSpace": "Loading the cosmos…",
+  "emptyTitle": "No photos yet",
+  "emptyHint": "Check your connection and reload",
+  "retry": "Reload",
+
+  "saveSuccess": "Photo saved",
+  "saveSuccessIos": "Photo saved. Set it from Settings → Wallpaper",
+  "saveFailed": "Failed to save",
+  "wallpaperSetSuccess": "Set as wallpaper",
+  "wallpaperSetFailed": "Failed to set wallpaper",
+  "wallpaperHintAndroid": "Set as wallpaper, or save as a photo.",
+  "wallpaperHintIos": "iOS does not allow setting wallpaper from an app.\nSave the photo and apply it from Settings → Wallpaper.",
+  "wallpaperSetButton": "Set as wallpaper",
+  "savePhotoButton": "Save photo",
+  "close": "Close",
+
+  "semSave": "Add to favorites",
+  "semCollection": "Open collection",
+  "semWallpaper": "Wallpaper preview",
+  "semTune": "Customize",
+
+  "semCurrentTime": "Current time {clock}",
+  "@semCurrentTime": {
+    "placeholders": {
+      "clock": { "type": "String" }
+    }
+  },
+
+  "hudDate": "{date}",
+  "@hudDate": {
+    "placeholders": {
+      "date": { "type": "DateTime", "format": "MMMEd" }
+    }
+  },
+
+  "categoryNebula": "Nebula",
+  "categoryGalaxy": "Galaxy",
+  "categoryEarth": "Earth",
+  "categoryMars": "Mars",
+  "categoryMoon": "Moon",
+  "categoryJupiter": "Jupiter",
+  "categorySun": "Sun",
+  "categoryDeepField": "Deep Field",
+  "categoryAurora": "Aurora",
+  "categorySaturn": "Saturn"
+}

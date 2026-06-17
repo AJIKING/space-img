@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../application/settings_controller.dart';
 import '../../domain/photos/photo.dart';
 import '../../domain/settings/viewer_settings.dart';
@@ -23,6 +24,7 @@ class CustomizeSheet extends StatelessWidget {
       listenable: controller,
       builder: (context, _) {
         final s = controller.settings;
+        final l10n = AppLocalizations.of(context);
         void update(ViewerSettings next) => controller.update(next);
 
         return SafeArea(
@@ -46,9 +48,9 @@ class CustomizeSheet extends StatelessWidget {
                     _grab(),
                     Row(
                       children: [
-                        const Text(
-                          'カスタマイズ',
-                          style: TextStyle(
+                        Text(
+                          l10n.tuneTitle,
+                          style: const TextStyle(
                             color: OrbitColors.hud,
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -70,7 +72,7 @@ class CustomizeSheet extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
 
-                    _label('観測テーマ'),
+                    _label(l10n.sectionTheme),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
@@ -84,27 +86,33 @@ class CustomizeSheet extends StatelessWidget {
                       ],
                     ),
 
-                    _label('時計'),
+                    _label(l10n.sectionClock),
                     ToggleRow(
                       key: const Key('tune-clock'),
-                      title: '時計を表示',
+                      title: l10n.clockShow,
                       subtitle: 'CLOCK OVERLAY',
                       value: s.showClock,
                       onChanged: (v) => update(s.copyWith(showClock: v)),
                     ),
                     SegmentedRow<ClockPosition>(
-                      title: '位置',
+                      title: l10n.clockPositionLabel,
                       subtitle: 'POSITION',
                       value: s.clockPosition,
-                      options: const [
-                        SegmentedOption(ClockPosition.top, '上'),
-                        SegmentedOption(ClockPosition.center, '中央'),
-                        SegmentedOption(ClockPosition.bottom, '下'),
+                      options: [
+                        SegmentedOption(ClockPosition.top, l10n.positionTop),
+                        SegmentedOption(
+                          ClockPosition.center,
+                          l10n.positionCenter,
+                        ),
+                        SegmentedOption(
+                          ClockPosition.bottom,
+                          l10n.positionBottom,
+                        ),
                       ],
                       onChanged: (v) => update(s.copyWith(clockPosition: v)),
                     ),
                     SegmentedRow<ClockSize>(
-                      title: 'サイズ',
+                      title: l10n.clockSizeLabel,
                       subtitle: 'SIZE',
                       value: s.clockSize,
                       options: const [
@@ -116,45 +124,45 @@ class CustomizeSheet extends StatelessWidget {
                     ),
                     ToggleRow(
                       key: const Key('tune-24h'),
-                      title: '24時間表示',
+                      title: l10n.clock24h,
                       subtitle: '24H FORMAT',
                       value: s.use24h,
                       onChanged: (v) => update(s.copyWith(use24h: v)),
                     ),
 
-                    _label('HUD(観測機器の表示)'),
+                    _label(l10n.sectionHud),
                     ToggleRow(
                       key: const Key('tune-telemetry'),
-                      title: '座標テレメトリ',
+                      title: l10n.hudTelemetry,
                       subtitle: 'RA / DEC READOUT',
                       value: s.showTelemetry,
                       onChanged: (v) => update(s.copyWith(showTelemetry: v)),
                     ),
                     ToggleRow(
                       key: const Key('tune-reticle'),
-                      title: 'レチクル(照準)',
+                      title: l10n.hudReticle,
                       subtitle: 'CENTER RETICLE',
                       value: s.showReticle,
                       onChanged: (v) => update(s.copyWith(showReticle: v)),
                     ),
                     ToggleRow(
                       key: const Key('tune-meta'),
-                      title: '写真情報',
+                      title: l10n.hudMeta,
                       subtitle: 'PHOTO METADATA',
                       value: s.showMeta,
                       onChanged: (v) => update(s.copyWith(showMeta: v)),
                     ),
 
-                    _label('アンビエント'),
+                    _label(l10n.sectionAmbient),
                     ToggleRow(
                       key: const Key('tune-auto'),
-                      title: '自動スライド',
+                      title: l10n.autoAdvance,
                       subtitle: 'AUTO ADVANCE',
                       value: s.autoAdvance,
                       onChanged: (v) => update(s.copyWith(autoAdvance: v)),
                     ),
                     SegmentedRow<int>(
-                      title: '切替の間隔',
+                      title: l10n.interval,
                       subtitle: 'INTERVAL',
                       value: s.intervalSeconds,
                       options: const [
@@ -166,8 +174,8 @@ class CustomizeSheet extends StatelessWidget {
                     ),
                     ToggleRow(
                       key: const Key('tune-keep-awake'),
-                      title: '画面を常時オン',
-                      subtitle: 'KEEP AWAKE — 眺める待ち受け',
+                      title: l10n.keepAwake,
+                      subtitle: l10n.keepAwakeSub,
                       value: s.keepAwake,
                       onChanged: (v) => update(s.copyWith(keepAwake: v)),
                     ),
@@ -232,6 +240,7 @@ class _ThemeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return GestureDetector(
       key: Key('theme-${category.name}'),
       onTap: onTap,
@@ -248,7 +257,7 @@ class _ThemeChip extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              categoryLabelsJa[category] ?? category.name,
+              categoryName(l10n, category),
               style: TextStyle(
                 color: selected ? Colors.white : OrbitColors.hud,
                 fontSize: 13,

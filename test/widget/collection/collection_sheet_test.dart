@@ -5,6 +5,7 @@ import 'package:orbit/src/domain/photos/photo.dart';
 import 'package:orbit/src/ui/collection/collection_sheet.dart';
 
 import '../../fixtures/in_memory_collection_store.dart';
+import '../../fixtures/localized_app.dart';
 import '../../fixtures/sample_photos.dart';
 
 void main() {
@@ -14,8 +15,8 @@ void main() {
     void Function(Photo) onSelect,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
+      localizedApp(
+        Scaffold(
           body: CollectionSheet(controller: controller, onSelect: onSelect),
         ),
       ),
